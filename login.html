@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Acesso Empresarial</title>
+
+  <style>
+    :root {
+      --preto: #000000;
+      --azul-marinho: #07182c;
+      --cinza: #5f6b7c;
+      --azul-claro: #a9bdd8;
+      --azul-principal: #2f7be5;
+      --branco: #f7f7f7;
+      --vermelho-claro: #f25a4b;
+      --vermelho: #d71919;
+      --verde: #168575;
+      --borda: #d8e2f0;
+      --card: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(47, 123, 229, 0.15), transparent 32%),
+        linear-gradient(135deg, #ffffff 0%, #eef4fc 52%, #dfeaf8 100%);
+      color: var(--azul-marinho);
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+
+    .info-side {
+      padding: 46px 8%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-side::before {
+      content: "";
+      position: absolute;
+      width: 430px;
+      height: 430px;
+      border-radius: 50%;
+      background: rgba(47, 123, 229, 0.1);
+      left: -160px;
+      bottom: -160px;
+    }
+
+    .logo,
+    .info-content,
+    .footer-note {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 54px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .logo img {
+      height: 66px;
+      display: block;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(47, 123, 229, 0.12);
+      color: var(--azul-principal);
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(47, 123, 229, 0.08);
+    }
+
+    .info-content h1 {
+      max-width: 680px;
+      font-size: clamp(38px, 5vw, 60px);
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+
+    .info-content h1 span {
+      color: var(--azul-principal);
+    }
+
+    .info-content p {
+      max-width: 620px;
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--cinza);
+      margin-bottom: 32px;
+    }
+
+    .flow-box {
+      max-width: 680px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(216, 226, 240, 0.9);
+      border-radius: 24px;
+      padding: 22px;
+      backdrop-filter: blur(8px);
+    }
+
+    .flow-title {
+      font-size: 16px;
+      margin-bottom: 18px;
+      font-weight: 900;
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .flow-step {
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 18px;
+      padding: 16px;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.35s ease, background 0.35s ease;
+    }
+
+    .flow-step::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(47, 123, 229, 0.10), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.28s ease;
+      pointer-events: none;
+    }
+
+    .flow-step:hover {
+      transform: translateY(-5px);
+      border-color: rgba(47, 123, 229, 0.38);
+      box-shadow: 0 18px 36px rgba(7, 24, 44, 0.12);
+      background: #ffffff;
+    }
+
+    .flow-step:hover::before {
+      opacity: 1;
+    }
+
+    .flow-step span {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(47, 123, 229, 0.14);
+      color: var(--azul-principal);
+      font-weight: 900;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.35s ease, background 0.35s ease, color 0.35s ease;
+    }
+
+    .flow-step:hover span {
+      transform: scale(1.04);
+      background: var(--azul-principal);
+      color: white;
+    }
+
+    .flow-step strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 7px;
+      position: relative;
+      z-index: 1;
+      transition: color 0.28s ease;
+    }
+
+    .flow-step small {
+      display: block;
+      color: var(--cinza);
+      font-size: 12px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
+    }
+
+    .flow-step:hover strong {
+      color: var(--azul-principal);
+    }
+
+    .footer-note {
+      margin-top: 42px;
+      color: var(--cinza);
+      font-size: 14px;
+    }
+
+    .footer-note strong {
+      color: var(--azul-marinho);
+    }
+
+    .login-side {
+      padding: 46px 8%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.42);
+      border-left: 1px solid rgba(216, 226, 240, 0.75);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 500px;
+      background: var(--card);
+      border: 1px solid var(--borda);
+      border-radius: 30px;
+      padding: 34px;
+      box-shadow: 0 28px 80px rgba(7, 24, 44, 0.18);
+    }
+
+    .step-indicator {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .step-pill {
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      padding: 13px;
+      background: var(--branco);
+    }
+
+    .step-pill.active {
+      background: rgba(47, 123, 229, 0.11);
+      border-color: rgba(47, 123, 229, 0.38);
+    }
+
+    .step-pill span {
+      display: block;
+      font-size: 12px;
+      color: var(--cinza);
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .step-pill strong {
+      font-size: 14px;
+    }
+
+    .login-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .login-header h2 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: var(--cinza);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .status {
+      background: rgba(22, 133, 117, 0.13);
+      color: var(--verde);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .form-screen {
+      display: none;
+    }
+
+    .form-screen.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--azul-marinho);
+    }
+
+    .input-box {
+      position: relative;
+    }
+
+    .input-box svg {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      color: var(--cinza);
+    }
+
+    .input-box input,
+    .input-box select {
+      width: 100%;
+      height: 52px;
+      border: 1px solid var(--borda);
+      border-radius: 15px;
+      padding: 0 16px 0 46px;
+      outline: none;
+      background: var(--branco);
+      color: var(--azul-marinho);
+      font-size: 15px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .input-box select {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .input-box input:focus,
+    .input-box select:focus {
+      border-color: var(--azul-principal);
+      box-shadow: 0 0 0 4px rgba(47, 123, 229, 0.12);
+      background: white;
+    }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 8px 0 22px;
+      font-size: 14px;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--cinza);
+      font-weight: 700;
+    }
+
+    .remember input {
+      accent-color: var(--azul-principal);
+    }
+
+    .form-options a {
+      color: var(--azul-principal);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .btn-submit,
+    .btn-secondary-action {
+      width: 100%;
+      height: 54px;
+      border: none;
+      border-radius: 15px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-submit {
+      background: var(--azul-principal);
+      color: white;
+      box-shadow: 0 14px 28px rgba(47, 123, 229, 0.26);
+    }
+
+    .btn-submit:hover {
+      background: var(--azul-marinho);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary-action {
+      margin-top: 12px;
+      background: white;
+      color: var(--azul-marinho);
+      border: 2px solid var(--borda);
+    }
+
+    .btn-secondary-action:hover {
+      border-color: var(--azul-principal);
+      color: var(--azul-principal);
+    }
+
+    .company-confirm {
+      background: linear-gradient(135deg, #eef4fc, #ffffff);
+      border: 1px solid var(--borda);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .company-confirm span {
+      display: block;
+      color: var(--cinza);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .company-confirm strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .profile-option {
+      position: relative;
+    }
+
+    .profile-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .profile-option label {
+      display: block;
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      background: var(--branco);
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--cinza);
+      transition: 0.2s;
+    }
+
+    .profile-option input:checked + label {
+      border-color: var(--azul-principal);
+      background: rgba(47, 123, 229, 0.1);
+      color: var(--azul-principal);
+      box-shadow: 0 0 0 4px rgba(47, 123, 229, 0.08);
+    }
+
+    .security-note {
+      margin-top: 22px;
+      padding: 14px;
+      border-radius: 15px;
+      background: rgba(47, 123, 229, 0.08);
+      color: var(--cinza);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .security-note strong {
+      color: var(--azul-marinho);
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      color: var(--cinza);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 800;
+      transition: 0.2s;
+    }
+
+    .back-home:hover {
+      color: var(--azul-principal);
+    }
+
+    @media (max-width: 1050px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .login-side {
+        border-left: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .info-side,
+      .login-side {
+        padding: 28px 6%;
+      }
+
+      .brand-row {
+        margin-bottom: 36px;
+        gap: 12px;
+      }
+
+      .logo img {
+        height: 56px;
+      }
+
+      .flow-steps,
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .login-card {
+        padding: 26px;
+        border-radius: 24px;
+      }
+
+      .login-header {
+        flex-direction: column;
+      }
+
+      .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="info-side">
+      <div class="info-content">
+        <div class="brand-row">
+          <a class="logo" href="index.html">
+            <img src="logo.png" alt="CodeStock Logo">
+          </a>
+
+          <span class="badge">Acesso em duas etapas</span>
+        </div>
+
+        <h1>Primeiro a empresa. Depois o <span>usuário interno</span>.</h1>
+
+        <p>
+          O CodeStock separa o acesso empresarial do acesso operacional. Assim, cada empresa mantém seus próprios
+          materiais, lotes, etiquetas, movimentações e usuários internos.
+        </p>
+
+        <div class="flow-box">
+          <div class="flow-title">Fluxo de acesso recomendado para o sistema</div>
+
+          <div class="flow-steps">
+            <div class="flow-step">
+              <span>01</span>
+              <strong>Empresa</strong>
+              <small>Validação por CNPJ, e-mail corporativo e senha empresarial.</small>
+            </div>
+
+            <div class="flow-step">
+              <span>02</span>
+              <strong>Funcionário</strong>
+              <small>Acesso individual com perfil operacional ou administrativo.</small>
+            </div>
+
+            <div class="flow-step">
+              <span>03</span>
+              <strong>Dashboard</strong>
+              <small>Consulta, cadastro, etiquetas QR Code e movimentações.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <strong>CodeStock</strong> · Sistema de Identificação e Controle de Matéria-Prima
+      </div>
+    </section>
+
+    <section class="login-side">
+      <div class="login-card">
+        <div class="step-indicator">
+          <div class="step-pill active" id="pillEmpresa">
+            <span>Etapa 1</span>
+            <strong>Login da empresa</strong>
+          </div>
+
+          <div class="step-pill" id="pillUsuario">
+            <span>Etapa 2</span>
+            <strong>Login interno</strong>
+          </div>
+        </div>
+
+        <div class="form-screen active" id="empresaScreen">
+          <div class="login-header">
+            <div>
+              <h2>Acesso empresarial</h2>
+              <p>Identifique a empresa antes de liberar o acesso dos funcionários.</p>
+            </div>
+
+            <span class="status">Empresa</span>
+          </div>
+
+          <form id="empresaForm">
+            <div class="form-group">
+              <label for="cnpj">CNPJ da empresa</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <path d="M9 3v18"></path>
+                  <path d="M15 3v18"></path>
+                  <path d="M3 9h18"></path>
+                  <path d="M3 15h18"></path>
+                </svg>
+                <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0001-00" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="emailEmpresa">E-mail corporativo</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16v16H4z"></path>
+                  <path d="m22 6-10 7L2 6"></path>
+                </svg>
+                <input type="email" id="emailEmpresa" name="emailEmpresa" placeholder="empresa@dominio.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="senhaEmpresa">Senha da empresa</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="senhaEmpresa" name="senhaEmpresa" placeholder="Digite a senha empresarial" required>
+              </div>
+            </div>
+
+            <button class="btn-submit" type="submit">Continuar para login interno</button>
+          </form>
+
+          <a class="back-home" href="index.html">← Voltar para a página inicial</a>
+        </div>
+
+        <div class="form-screen" id="usuarioScreen">
+          <div class="login-header">
+            <div>
+              <h2>Acesso interno</h2>
+              <p>Agora informe o usuário responsável pela operação no sistema.</p>
+            </div>
+
+            <span class="status">Usuário</span>
+          </div>
+
+          <div class="company-confirm">
+            <span>Empresa selecionada</span>
+            <strong id="empresaSelecionada">Empresa CodeStock</strong>
+          </div>
+
+          <form action="home.html" method="get">
+            <div class="form-group">
+              <label>Perfil de acesso</label>
+
+              <div class="profile-grid">
+                <div class="profile-option">
+                  <input type="radio" id="operador" name="perfil" value="operador" checked>
+                  <label for="operador">Operador</label>
+                </div>
+
+                <div class="profile-option">
+                  <input type="radio" id="conferente" name="perfil" value="conferente">
+                  <label for="conferente">Conferente</label>
+                </div>
+
+                <div class="profile-option">
+                  <input type="radio" id="admin" name="perfil" value="admin">
+                  <label for="admin">Admin</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="usuario">Usuário ou matrícula</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="usuario" name="usuario" placeholder="Ex: OP1024 ou admin" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="senhaUsuario">Senha do usuário</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="senhaUsuario" name="senhaUsuario" placeholder="Digite sua senha" required>
+              </div>
+            </div>
+
+            <div class="form-options">
+              <label class="remember">
+                <input type="checkbox" name="lembrar">
+                Manter conectado
+              </label>
+
+              <a href="#">Esqueci minha senha</a>
+            </div>
+
+            <button class="btn-submit" type="submit">Entrar no dashboard</button>
+            <button class="btn-secondary-action" type="button" id="voltarEmpresa">Trocar empresa</button>
+          </form>
+
+          <div class="security-note">
+            <strong>Perfis:</strong> operador cadastra e movimenta materiais; conferente valida recebimentos;
+            administrador gerencia usuários, relatórios e configurações.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const empresaForm = document.getElementById("empresaForm");
+    const empresaScreen = document.getElementById("empresaScreen");
+    const usuarioScreen = document.getElementById("usuarioScreen");
+    const pillEmpresa = document.getElementById("pillEmpresa");
+    const pillUsuario = document.getElementById("pillUsuario");
+    const voltarEmpresa = document.getElementById("voltarEmpresa");
+    const empresaSelecionada = document.getElementById("empresaSelecionada");
+
+    empresaForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const emailEmpresa = document.getElementById("emailEmpresa").value;
+      const dominio = emailEmpresa.split("@")[1] || "empresa.com";
+      empresaSelecionada.textContent = "Empresa vinculada a " + dominio;
+
+      empresaScreen.classList.remove("active");
+      usuarioScreen.classList.add("active");
+
+      pillEmpresa.classList.remove("active");
+      pillUsuario.classList.add("active");
+    });
+
+    voltarEmpresa.addEventListener("click", function() {
+      usuarioScreen.classList.remove("active");
+      empresaScreen.classList.add("active");
+
+      pillUsuario.classList.remove("active");
+      pillEmpresa.classList.add("active");
+    });
+  </script>
+</body>
+</html>
