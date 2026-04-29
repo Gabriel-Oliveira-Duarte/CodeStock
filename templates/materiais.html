@@ -5,38 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CodeStock | Materiais</title>
 
-  <link rel="stylesheet" href="../static/css/materiais.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/materiais.css') }}">
 </head>
 
 <body>
   <div class="layout">
     <aside class="sidebar">
       <div>
-        <a class="logo" href="home.html">
-          <img src="../assets/img/logo1.png" alt="CodeStock Logo">
+        <a class="logo" href="{{ url_for('home') }}">
+          <img src="{{ url_for('static', filename='assets/img/logo1.png') }}" alt="CodeStock Logo">
         </a>
 
         <div class="company-box">
           <span>Empresa conectada</span>
-          <strong>Panasonic · Unidade MG</strong>
+          <strong>{{ session.get('empresa_nome', 'Empresa') }}</strong>
         </div>
 
         <nav class="menu">
-          <a href="home.html">
+          <a href="{{ url_for('home') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 11l9-8 9 8"></path><path d="M5 10v11h14V10"></path>
             </svg>
             Home
           </a>
 
-          <a href="materialcadastro.html">
+          <a href="{{ url_for('materialcadastro') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M12 5v14"></path><path d="M5 12h14"></path>
             </svg>
             Cadastrar material
           </a>
 
-          <a href="materiais.html" class="active">
+          <a href="{{ url_for('materiais') }}" class="active">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
               <path d="M3.3 7 12 12l8.7-5"></path><path d="M12 22V12"></path>
@@ -44,21 +44,21 @@
             Materiais
           </a>
 
-          <a href="etiquetas.html">
+          <a href="{{ url_for('etiquetas') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h2v2h-2zM18 14h3v3M14 18h3v3M19 19h2v2"></path>
             </svg>
             Etiquetas QR Code
           </a>
 
-          <a href="movimentacoes.html">
+          <a href="{{ url_for('movimentacoes') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M21 7H3"></path><path d="M7 3 3 7l4 4"></path><path d="M3 17h18"></path><path d="m17 13 4 4-4 4"></path>
             </svg>
             Movimentações
           </a>
 
-          <a href="relatorios.html">
+          <a href="{{ url_for('relatorios') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path>
             </svg>
@@ -70,9 +70,9 @@
       <div class="sidebar-footer">
         <div class="user-card">
           <span>Usuário logado</span>
-          <strong>Admin · Estoque</strong>
+          <strong>{{ session.get('usuario_nome', 'Usuário') }}</strong>
         </div>
-        <a class="logout" href="login.html">Sair do sistema</a>
+        <a class="logout" href="{{ url_for('logout') }}">Sair do sistema</a>
       </div>
     </aside>
 
@@ -83,20 +83,26 @@
           <p>Consulte, filtre e acompanhe os registros de matéria-prima cadastrados no sistema.</p>
         </div>
 
-        <a href="cadastro-material.html" class="btn-primary">+ Cadastrar material</a>
+        <a href="{{ url_for('materialcadastro') }}" class="btn-primary">+ Cadastrar material</a>
       </section>
+
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+          <div class="flash-area">
+            {% for categoria, mensagem in mensagens %}
+              <div class="flash {{ categoria }}">{{ mensagem }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
 
       <section class="metrics">
         <div class="metric-card">
           <div class="metric-top">
-            <div class="metric-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              </svg>
-            </div>
+            <div class="metric-icon blue">▣</div>
             <span>Total</span>
           </div>
-          <strong>248</strong>
+          <strong>{{ materiais|length }}</strong>
           <small>materiais cadastrados</small>
         </div>
 
@@ -105,7 +111,7 @@
             <div class="metric-icon green">✓</div>
             <span>Liberados</span>
           </div>
-          <strong>186</strong>
+          <strong>{{ materiais|selectattr('status', 'equalto', 'Liberado')|list|length }}</strong>
           <small>prontos para uso</small>
         </div>
 
@@ -114,17 +120,17 @@
             <div class="metric-icon red">!</div>
             <span>Pendentes</span>
           </div>
-          <strong>12</strong>
+          <strong>{{ materiais|selectattr('status', 'equalto', 'Pendente')|list|length }}</strong>
           <small>aguardando conferência</small>
         </div>
 
         <div class="metric-card">
           <div class="metric-top">
             <div class="metric-icon gray">▦</div>
-            <span>Com QR Code</span>
+            <span>Em conferência</span>
           </div>
-          <strong>236</strong>
-          <small>etiquetas geradas</small>
+          <strong>{{ materiais|selectattr('status', 'equalto', 'Conferência')|list|length }}</strong>
+          <small>materiais em análise</small>
         </div>
       </section>
 
@@ -140,16 +146,10 @@
 
         <div class="filters">
           <div class="input-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path>
-            </svg>
             <input type="text" id="busca" placeholder="Buscar por código, descrição ou lote..." onkeyup="filtrarTabela()">
           </div>
 
           <div class="input-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M3 4h18l-7 8v6l-4 2v-8z"></path>
-            </svg>
             <select id="statusFiltro" onchange="filtrarTabela()">
               <option value="">Status</option>
               <option value="Liberado">Liberado</option>
@@ -160,31 +160,28 @@
           </div>
 
           <div class="input-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>
-            </svg>
             <select id="localFiltro" onchange="filtrarTabela()">
               <option value="">Localização</option>
-              <option value="A3">A3</option>
-              <option value="B1">B1</option>
-              <option value="C2">C2</option>
-              <option value="Recebimento">Recebimento</option>
+              {% for material in materiais %}
+                {% if material.localizacao %}
+                  <option value="{{ material.localizacao }}">{{ material.localizacao }}</option>
+                {% endif %}
+              {% endfor %}
             </select>
           </div>
 
           <div class="input-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M4 4h16v16H4z"></path><path d="m22 6-10 7L2 6"></path>
-            </svg>
             <select id="fornecedorFiltro" onchange="filtrarTabela()">
               <option value="">Fornecedor</option>
-              <option value="Fornecedor A">Fornecedor A</option>
-              <option value="Fornecedor B">Fornecedor B</option>
-              <option value="Fornecedor C">Fornecedor C</option>
+              {% for material in materiais %}
+                {% if material.fornecedor %}
+                  <option value="{{ material.fornecedor }}">{{ material.fornecedor }}</option>
+                {% endif %}
+              {% endfor %}
             </select>
           </div>
 
-          <a href="etiquetas.html" class="btn-primary">QR Code</a>
+          <a href="{{ url_for('etiquetas') }}" class="btn-primary">QR Code</a>
         </div>
 
         <div class="table-wrap">
@@ -204,95 +201,49 @@
             </thead>
 
             <tbody>
-              <tr>
-                <td><div class="material-code"><div class="qr-mini"></div>MP-1024</div></td>
-                <td>Resina ABS</td>
-                <td>L2408</td>
-                <td>Fornecedor A</td>
-                <td>120 kg</td>
-                <td>A3</td>
-                <td>12/04/2026</td>
-                <td><span class="tag ok">Liberado</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button class="icon-btn" title="Visualizar">⌕</button>
-                    <button class="icon-btn" title="Editar">✎</button>
-                    <button class="icon-btn" title="Etiqueta">▦</button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td><div class="material-code"><div class="qr-mini"></div>MP-2077</div></td>
-                <td>Componente eletrônico</td>
-                <td>C7731</td>
-                <td>Fornecedor B</td>
-                <td>500 un</td>
-                <td>Recebimento</td>
-                <td>14/04/2026</td>
-                <td><span class="tag alert">Pendente</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button class="icon-btn" title="Visualizar">⌕</button>
-                    <button class="icon-btn" title="Editar">✎</button>
-                    <button class="icon-btn" title="Etiqueta">▦</button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td><div class="material-code"><div class="qr-mini"></div>MP-3310</div></td>
-                <td>Embalagem técnica</td>
-                <td>E9902</td>
-                <td>Fornecedor C</td>
-                <td>80 un</td>
-                <td>B1</td>
-                <td>15/04/2026</td>
-                <td><span class="tag ok">Liberado</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button class="icon-btn" title="Visualizar">⌕</button>
-                    <button class="icon-btn" title="Editar">✎</button>
-                    <button class="icon-btn" title="Etiqueta">▦</button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td><div class="material-code"><div class="qr-mini"></div>MP-4481</div></td>
-                <td>Polímero industrial</td>
-                <td>P1812</td>
-                <td>Fornecedor A</td>
-                <td>64 kg</td>
-                <td>C2</td>
-                <td>17/04/2026</td>
-                <td><span class="tag info">Conferência</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button class="icon-btn" title="Visualizar">⌕</button>
-                    <button class="icon-btn" title="Editar">✎</button>
-                    <button class="icon-btn" title="Etiqueta">▦</button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td><div class="material-code"><div class="qr-mini"></div>MP-5560</div></td>
-                <td>Aditivo químico</td>
-                <td>Q5060</td>
-                <td>Fornecedor B</td>
-                <td>30 L</td>
-                <td>Recebimento</td>
-                <td>18/04/2026</td>
-                <td><span class="tag gray">Bloqueado</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button class="icon-btn" title="Visualizar">⌕</button>
-                    <button class="icon-btn" title="Editar">✎</button>
-                    <button class="icon-btn" title="Etiqueta">▦</button>
-                  </div>
-                </td>
-              </tr>
+              {% if materiais %}
+                {% for material in materiais %}
+                  <tr>
+                    <td><div class="material-code"><div class="qr-mini"></div>{{ material.codigo }}</div></td>
+                    <td>{{ material.descricao }}</td>
+                    <td>{{ material.lote }}</td>
+                    <td>{{ material.fornecedor }}</td>
+                    <td>{{ material.quantidade }} {{ material.unidade }}</td>
+                    <td>{{ material.localizacao }}</td>
+                    <td>
+                      {% if material.data_entrada %}
+                        {{ material.data_entrada.strftime('%d/%m/%Y') }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if material.status == 'Liberado' %}
+                        <span class="tag ok">Liberado</span>
+                      {% elif material.status == 'Pendente' %}
+                        <span class="tag alert">Pendente</span>
+                      {% elif material.status == 'Conferência' %}
+                        <span class="tag info">Conferência</span>
+                      {% elif material.status == 'Bloqueado' %}
+                        <span class="tag gray">Bloqueado</span>
+                      {% else %}
+                        <span class="tag gray">{{ material.status }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="row-actions">
+                        <button class="icon-btn" title="Visualizar">⌕</button>
+                        <button class="icon-btn" title="Editar">✎</button>
+                        <button class="icon-btn" title="Etiqueta">▦</button>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="9">Nenhum material cadastrado ainda.</td>
+                </tr>
+              {% endif %}
             </tbody>
           </table>
         </div>
@@ -303,34 +254,30 @@
           <div class="panel-header">
             <div>
               <h2>Ocupação por localização</h2>
-              <p>Resumo fictício para demonstrar controle físico do estoque.</p>
+              <p>Resumo baseado nos materiais cadastrados.</p>
             </div>
           </div>
 
           <div class="location-list">
-            <div class="location-item">
-              <div>
-                <strong>Almoxarifado A3</strong>
-                <small>74 materiais</small>
+            {% if materiais %}
+              {% for material in materiais[:3] %}
+                <div class="location-item">
+                  <div>
+                    <strong>{{ material.localizacao }}</strong>
+                    <small>{{ material.codigo }} · {{ material.descricao }}</small>
+                  </div>
+                  <div class="progress"><span style="width: 60%;"></span></div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="location-item">
+                <div>
+                  <strong>Nenhuma localização cadastrada</strong>
+                  <small>Cadastre materiais para visualizar esse painel.</small>
+                </div>
+                <div class="progress"><span style="width: 0%;"></span></div>
               </div>
-              <div class="progress"><span style="width: 78%;"></span></div>
-            </div>
-
-            <div class="location-item">
-              <div>
-                <strong>Estoque B1</strong>
-                <small>52 materiais</small>
-              </div>
-              <div class="progress"><span style="width: 58%;"></span></div>
-            </div>
-
-            <div class="location-item">
-              <div>
-                <strong>Setor C2</strong>
-                <small>31 materiais</small>
-              </div>
-              <div class="progress"><span style="width: 42%;"></span></div>
-            </div>
+            {% endif %}
           </div>
         </div>
 
@@ -343,34 +290,40 @@
           </div>
 
           <div class="pending-list">
-            <div class="pending-item">
-              <div>
-                <strong>MP-2077 · Componente eletrônico</strong>
-                <small>Lote C7731 · Recebimento</small>
-              </div>
-              <span class="tag alert">Pendente</span>
-            </div>
+            {% set pendentes = materiais|selectattr('status', 'in', ['Pendente', 'Conferência', 'Bloqueado'])|list %}
 
-            <div class="pending-item">
-              <div>
-                <strong>MP-4481 · Polímero industrial</strong>
-                <small>Lote P1812 · Conferência</small>
-              </div>
-              <span class="tag info">Conferência</span>
-            </div>
+            {% if pendentes %}
+              {% for material in pendentes %}
+                <div class="pending-item">
+                  <div>
+                    <strong>{{ material.codigo }} · {{ material.descricao }}</strong>
+                    <small>Lote {{ material.lote }} · {{ material.localizacao }}</small>
+                  </div>
 
-            <div class="pending-item">
-              <div>
-                <strong>MP-5560 · Aditivo químico</strong>
-                <small>Lote Q5060 · Bloqueado</small>
+                  {% if material.status == 'Pendente' %}
+                    <span class="tag alert">Pendente</span>
+                  {% elif material.status == 'Conferência' %}
+                    <span class="tag info">Conferência</span>
+                  {% else %}
+                    <span class="tag gray">{{ material.status }}</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="pending-item">
+                <div>
+                  <strong>Nenhuma pendência encontrada</strong>
+                  <small>Materiais pendentes, em conferência ou bloqueados aparecerão aqui.</small>
+                </div>
+                <span class="tag ok">Normal</span>
               </div>
-              <span class="tag gray">Bloqueado</span>
-            </div>
+            {% endif %}
           </div>
         </div>
       </section>
     </main>
   </div>
-  <script src="../static/js/materiais.js"></script>
+
+  <script src="{{ url_for('static', filename='js/materiais.js') }}"></script>
 </body>
 </html>

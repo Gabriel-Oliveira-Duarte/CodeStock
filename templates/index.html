@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CodeStock | Controle de Matéria-Prima</title>
 
-  <link rel="stylesheet" href="../static/css/index.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
   <header>
     <div class="logo">
-      <img src="../assets/img/logo.png" alt="CodeStock Logo">
+      <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="CodeStock Logo">
     </div>
 
     <nav>
       <a href="#inicio">Início</a>
       <a href="#funcionalidades">Funcionalidades</a>
       <a href="#processo">Processo</a>
-      <a href="cadastro.html">Cadastrar empresa</a>
-      <a href="login.html" class="btn-login">Entrar</a>
+      <a href="{{ url_for('cadastro') }}">Cadastrar empresa</a>
+      <a href="{{ url_for('login') }}" class="btn-login">Entrar</a>
     </nav>
   </header>
 
@@ -36,7 +36,7 @@
         </p>
 
         <div class="actions">
-          <a href="login.html" class="btn-primary">Acessar sistema</a>
+          <a href="{{ url_for('login') }}" class="btn-primary">Acessar sistema</a>
           <a href="#funcionalidades" class="btn-secondary">Ver funcionalidades</a>
         </div>
       </div>
@@ -190,7 +190,7 @@
             <p>Faça login para cadastrar, consultar e movimentar materiais.</p>
           </div>
 
-          <a href="login.html" class="btn-primary">Entrar no sistema</a>
+          <a href="{{ url_for('login') }}" class="btn-primary">Entrar no sistema</a>
         </div>
       </div>
     </section>
@@ -298,6 +298,6 @@
     <p><span>CodeStock</span> · Sistema de Identificação e Controle de Matéria-Prima</p>
     <p>Projeto TCC · SENAI</p>
   </footer>
-  <script src="../static/js/index.js"></script>
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>

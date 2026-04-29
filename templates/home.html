@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CodeStock | Home do Sistema</title>
 
-  <link rel="stylesheet" href="../static/css/home.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 </head>
 
 <body>
   <div class="layout">
     <aside class="sidebar">
       <div>
-        <a class="logo" href="home.html">
-          <img src="../assets/img/logo1.png" alt="CodeStock Logo">
+        <a class="logo" href="{{ url_for('home') }}">
+          <img src="{{ url_for('static', filename='assets/img/logo1.png') }}" alt="CodeStock Logo">
         </a>
 
         <div class="company-box">
@@ -22,21 +22,21 @@
         </div>
 
         <nav class="menu">
-          <a href="home.html" class="active">
+          <a href="{{ url_for('home') }}" class="active">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 11l9-8 9 8"></path><path d="M5 10v11h14V10"></path>
             </svg>
             Home
           </a>
 
-          <a href="materialcadastro.html">
+          <a href="{{ url_for('materialcadastro') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M12 5v14"></path><path d="M5 12h14"></path>
             </svg>
             Cadastrar material
           </a>
 
-          <a href="materiais.html">
+          <a href="{{ url_for('materiais') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
               <path d="M3.3 7 12 12l8.7-5"></path><path d="M12 22V12"></path>
@@ -44,21 +44,21 @@
             Materiais
           </a>
 
-          <a href="etiquetas.html">
+          <a href="{{ url_for('etiquetas') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h2v2h-2zM18 14h3v3M14 18h3v3M19 19h2v2"></path>
             </svg>
             Etiquetas QR Code
           </a>
 
-          <a href="movimentacoes.html">
+          <a href="{{ url_for('movimentacoes') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M21 7H3"></path><path d="M7 3 3 7l4 4"></path><path d="M3 17h18"></path><path d="m17 13 4 4-4 4"></path>
             </svg>
             Movimentações
           </a>
 
-          <a href="relatorios.html">
+          <a href="{{ url_for('relatorios') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path>
             </svg>
@@ -72,7 +72,7 @@
           <span>Usuário logado</span>
           <strong>Admin · Estoque</strong>
         </div>
-        <a class="logout" href="login.html">Sair do sistema</a>
+        <a class="logout" href="{{ url_for('login') }}">Sair do sistema</a>
       </div>
     </aside>
 
@@ -95,9 +95,9 @@
           </p>
 
           <div class="quick-buttons">
-            <a href="materialcadastro.html" class="btn-primary">+ Novo material</a>
-            <a href="etiquetas.html" class="btn-secondary">Gerar etiqueta</a>
-            <a href="materiais.html" class="btn-secondary">Consultar estoque</a>
+            <a href="{{ url_for('materialcadastro') }}" class="btn-primary">+ Novo material</a>
+            <a href="{{ url_for('etiquetas') }}" class="btn-secondary">Gerar etiqueta</a>
+            <a href="{{ url_for('materiais') }}" class="btn-secondary">Consultar estoque</a>
           </div>
         </div>
 
@@ -227,7 +227,7 @@
           </div>
 
           <div class="actions-list">
-            <a class="action-card" href="materialcadastro.html">
+            <a class="action-card" href="{{ url_for('materialcadastro') }}">
               <div class="metric-icon blue">+</div>
               <div>
                 <strong>Cadastrar matéria-prima</strong>
@@ -235,7 +235,7 @@
               </div>
             </a>
 
-            <a class="action-card" href="etiquetas.html">
+            <a class="action-card" href="{{ url_for('etiquetas') }}">
               <div class="metric-icon green">▦</div>
               <div>
                 <strong>Gerar etiqueta QR Code</strong>
@@ -243,7 +243,7 @@
               </div>
             </a>
 
-            <a class="action-card" href="movimentacoes.html">
+            <a class="action-card" href="{{ url_for('movimentacoes') }}">
               <div class="metric-icon red">↻</div>
               <div>
                 <strong>Registrar movimentação</strong>
@@ -301,6 +301,6 @@
       </section>
     </main>
   </div>
-  <script src="../static/js/home.js"></script>
+  <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
 </html>

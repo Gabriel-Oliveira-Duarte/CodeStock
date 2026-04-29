@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CodeStock | Cadastro da Empresa</title>
 
-  <link rel="stylesheet" href="../static/css/cadastro.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
 </head>
 
 <body>
@@ -13,8 +13,8 @@
     <section class="info-side">
       <div class="info-content">
         <div class="brand-row">
-          <a class="logo" href="index.html">
-            <img src="../assets/img/logo.png" alt="CodeStock Logo">
+          <a class="logo" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="CodeStock Logo">
           </a>
 
           <span class="badge">Cadastro empresarial</span>
@@ -89,7 +89,7 @@
           <span class="status">Novo acesso</span>
         </div>
 
-        <form action="login.html" method="get">
+        <form action="{{ url_for('cadastro') }}" method="post">
           <div class="section-label">Dados da empresa</div>
 
           <div class="form-grid">
@@ -276,12 +276,12 @@
           <button class="btn-submit" type="submit">Cadastrar empresa</button>
 
           <p class="login-link">
-            Empresa já cadastrada? <a href="login.html">Acessar login</a>
+            Empresa já cadastrada? <a href="{{ url_for('login') }}">Acessar login</a>
           </p>
         </form>
       </div>
     </section>
   </main>
-  <script src="../static/js/cadastro.js"></script>
+  <script src="{{ url_for('static', filename='js/cadastro.js') }}"></script>
 </body>
 </html>

@@ -1,30 +1,36 @@
-const hoje = new Date().toISOString().split("T")[0];
-    document.getElementById("dataEntrada").value = hoje;
+function alternarMenu() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("open");
+}
 
-    function atualizarPreview() {
-      const codigo = document.getElementById("codigo").value || "MP-0000";
-      const descricao = document.getElementById("descricao").value || "Nova matéria-prima";
-      const lote = document.getElementById("lote").value || "—";
-      const quantidade = document.getElementById("quantidade").value || "—";
-      const unidade = document.getElementById("unidade").value || "";
-      const localizacao = document.getElementById("localizacao").value || "—";
-
-      document.getElementById("previewCodigo").textContent = codigo;
-      document.getElementById("previewDescricao").textContent = descricao;
-      document.getElementById("previewTexto").textContent = "Material preparado para identificação, conferência e rastreabilidade por QR Code.";
-      document.getElementById("previewLote").textContent = "Lote: " + lote;
-      document.getElementById("previewQtd").textContent = "Quantidade: " + quantidade + " " + unidade;
-      document.getElementById("previewLocal").textContent = "Local: " + localizacao;
+document.querySelectorAll(".menu a, .logout").forEach((link) => {
+  link.addEventListener("click", () => {
+    const sidebar = document.getElementById("sidebar");
+    if (window.innerWidth <= 900) {
+      sidebar.classList.remove("open");
     }
+  });
+});
 
-    function limparFormulario() {
-      document.getElementById("materialForm").reset();
-      document.getElementById("dataEntrada").value = hoje;
-      document.getElementById("successMessage").classList.remove("show");
-      atualizarPreview();
-    }
+function gerarRelatorio() {
+  alert("Relatório gerado com sucesso. Esta ação pode ser conectada ao backend futuramente.");
+}
 
-    document.getElementById("materialForm").addEventListener("submit", function(event) {
-      event.preventDefault();
-      document.getElementById("successMessage").classList.add("show");
-    });
+function filtrarTabela() {
+  const busca = document.getElementById("busca").value.toLowerCase();
+  const status = document.getElementById("statusFiltro").value.toLowerCase();
+  const linhas = document.querySelectorAll("#relatoriosTabela tbody tr");
+
+  linhas.forEach((linha) => {
+    const texto = linha.innerText.toLowerCase();
+    const combinaBusca = texto.includes(busca);
+    const combinaStatus = status === "" || texto.includes(status);
+    linha.style.display = combinaBusca && combinaStatus ? "" : "none";
+  });
+}
+
+function limparTabela() {
+  document.getElementById("busca").value = "";
+  document.getElementById("statusFiltro").value = "";
+  filtrarTabela();
+}

@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CodeStock | Etiquetas</title>
 
-  <link rel="stylesheet" href="../static/css/etiquetas.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/etiquetas.css') }}">
 </head>
 
 <body>
   <div class="layout">
     <aside class="sidebar">
       <div>
-        <a class="logo" href="home.html">
-          <img src="../assets/img/logo1.png" alt="CodeStock Logo">
+        <a class="logo" href="{{ url_for('home') }}">
+          <img src="{{ url_for('static', filename='assets/img/logo1.png') }}" alt="CodeStock Logo">
         </a>
 
         <div class="company-box">
@@ -22,7 +22,7 @@
         </div>
 
         <nav class="menu">
-          <a href="home.html">
+          <a href="{{ url_for('home') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 11l9-8 9 8"></path>
               <path d="M5 10v11h14V10"></path>
@@ -30,7 +30,7 @@
             Home
           </a>
 
-          <a href="materialcadastro.html">
+          <a href="{{ url_for('materialcadastro') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M12 5v14"></path>
               <path d="M5 12h14"></path>
@@ -38,7 +38,7 @@
             Cadastrar material
           </a>
 
-          <a href="materiais.html">
+          <a href="{{ url_for('materiais') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
               <path d="M3.3 7 12 12l8.7-5"></path>
@@ -47,7 +47,7 @@
             Materiais
           </a>
 
-          <a href="etiquetas.html" class="active">
+          <a href="{{ url_for('etiquetas') }}" class="active">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="3" y="3" width="7" height="7"></rect>
               <rect x="14" y="3" width="7" height="7"></rect>
@@ -57,7 +57,7 @@
             Etiquetas QR Code
           </a>
 
-          <a href="movimentacoes.html">
+          <a href="{{ url_for('movimentacoes') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M21 7H3"></path>
               <path d="M7 3 3 7l4 4"></path>
@@ -67,7 +67,7 @@
             Movimentações
           </a>
 
-          <a href="relatorios.html">
+          <a href="{{ url_for('relatorios') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 3v18h18"></path>
               <path d="m19 9-5 5-4-4-3 3"></path>
@@ -82,7 +82,7 @@
           <span>Usuário logado</span>
           <strong>Admin · Estoque</strong>
         </div>
-        <a class="logout" href="login.html">Sair do sistema</a>
+        <a class="logout" href="{{ url_for('login') }}">Sair do sistema</a>
       </div>
     </aside>
 
@@ -277,7 +277,7 @@
 
           <div class="label-preview" id="labelPreview">
             <div class="label-header">
-              <img src="logo.png" alt="CodeStock Logo">
+              <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="CodeStock Logo">
               <span id="previewStatus">Ativa</span>
             </div>
 
@@ -326,6 +326,6 @@
       </section>
     </main>
   </div>
-  <script src="../static/js/etiquetas.js"></script>
+  <script src="{{ url_for('static', filename='js/etiquetas.js') }}"></script>
 </body>
 </html>
