@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Controle de Matéria-Prima</title>
+
+  <link rel="stylesheet" href="../static/css/index.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="../assets/img/logo.png" alt="CodeStock Logo">
+    </div>
+
+    <nav>
+      <a href="#inicio">Início</a>
+      <a href="#funcionalidades">Funcionalidades</a>
+      <a href="#processo">Processo</a>
+      <a href="cadastro.html">Cadastrar empresa</a>
+      <a href="login.html" class="btn-login">Entrar</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div>
+        <span class="badge">Sistema web com etiquetas e QR Code</span>
+
+        <h1>Controle sua matéria-prima com mais <span>rastreabilidade</span> e menos erros.</h1>
+
+        <p>
+          O CodeStock é uma solução para cadastrar materiais, gerar etiquetas padronizadas com QR Code,
+          registrar entradas e consultar rapidamente a localização e o status de cada item no estoque.
+        </p>
+
+        <div class="actions">
+          <a href="login.html" class="btn-primary">Acessar sistema</a>
+          <a href="#funcionalidades" class="btn-secondary">Ver funcionalidades</a>
+        </div>
+      </div>
+
+      <div class="dashboard-card dashboard-preview" id="demo">
+        <div class="card-header">
+          <div>
+            <h2>Visão geral do estoque</h2>
+            <p class="mini-text">Resumo operacional antes de acessar o sistema</p>
+          </div>
+
+          <span class="status">Online</span>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-title">
+              <div class="mini-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                  <line x1="12" y1="22" x2="12" y2="12"></line>
+                </svg>
+              </div>
+              <span>Materiais</span>
+            </div>
+
+            <div class="metric-compare positive">+35% organização</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">
+              <div class="mini-icon red" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  <circle cx="18" cy="18" r="3"></circle>
+                  <line x1="18" y1="16.7" x2="18" y2="18.2"></line>
+                  <line x1="18" y1="19.4" x2="18.01" y2="19.4"></line>
+                </svg>
+              </div>
+              <span>Pendências</span>
+            </div>
+
+            <div class="metric-compare negative">-60% erros</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">
+              <div class="mini-icon green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <line x1="8" y1="11" x2="8" y2="14"></line>
+                  <line x1="11" y1="11" x2="11" y2="14"></line>
+                  <line x1="14" y1="11" x2="14" y2="14"></line>
+                </svg>
+              </div>
+              <span>QR Codes</span>
+            </div>
+
+            <div class="metric-compare positive">+80% rastreabilidade</div>
+          </div>
+        </div>
+
+        <div class="chart-box comparison-chart-box">
+          <div class="comparison-header">
+            <h3>Comparativo operacional<br>(Antes x Depois)</h3>
+            <p>Evolução após<br>implementação do sistema</p>
+          </div>
+
+          <div class="comparison-area">
+            <div class="y-axis">
+              <span>100%</span>
+              <span>75%</span>
+              <span>50%</span>
+              <span>25%</span>
+              <span>0%</span>
+            </div>
+
+            <div class="chart-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <div class="comparison-bars">
+              <div class="comparison-group">
+                <div class="bars-wrap">
+                  <div class="bar-column before" style="height: 85%;"></div>
+                  <div class="bar-column after" style="height: 30%;"></div>
+                </div>
+
+                <div class="chart-icon">!</div>
+                <small>Erros</small>
+              </div>
+
+              <div class="comparison-group">
+                <div class="bars-wrap">
+                  <div class="bar-column before" style="height: 75%;"></div>
+                  <div class="bar-column after" style="height: 25%;"></div>
+                </div>
+
+                <div class="chart-icon">↻</div>
+                <small>Retrabalho</small>
+              </div>
+
+              <div class="comparison-group">
+                <div class="bars-wrap">
+                  <div class="bar-column before" style="height: 90%;"></div>
+                  <div class="bar-column after" style="height: 35%;"></div>
+                </div>
+
+                <div class="chart-icon">◷</div>
+                <small>Tempo</small>
+              </div>
+
+              <div class="comparison-group">
+                <div class="bars-wrap">
+                  <div class="bar-column before" style="height: 40%;"></div>
+                  <div class="bar-column after" style="height: 75%;"></div>
+                </div>
+
+                <div class="chart-icon">▣</div>
+                <small>Controle</small>
+              </div>
+
+              <div class="comparison-group">
+                <div class="bars-wrap">
+                  <div class="bar-column before" style="height: 45%;"></div>
+                  <div class="bar-column after" style="height: 85%;"></div>
+                </div>
+
+                <div class="chart-icon">✓</div>
+                <small>Confiabilidade</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="comparison-legend">
+            <span><i class="legend-red"></i> Antes do sistema</span>
+            <span><i class="legend-blue"></i> Depois do sistema</span>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <div>
+            <strong>Próxima etapa</strong>
+            <p>Faça login para cadastrar, consultar e movimentar materiais.</p>
+          </div>
+
+          <a href="login.html" class="btn-primary">Entrar no sistema</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="funcionalidades">
+      <div class="section-title">
+        <h2>Funcionalidades principais</h2>
+        <p>Uma base simples para o TCC, mas com aparência profissional e foco em um problema real de estoque.</p>
+      </div>
+
+      <div class="grid">
+        <div class="feature-card">
+          <div class="icon">＋</div>
+          <h3>Cadastro de materiais</h3>
+          <p>Registre código, descrição, lote, fornecedor, quantidade, unidade, localização e status.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">▦</div>
+          <h3>Etiqueta com QR Code</h3>
+          <p>Gere uma etiqueta padronizada para impressão e identificação física da matéria-prima.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">⌕</div>
+          <h3>Consulta rápida</h3>
+          <p>Localize um item por código, lote, descrição, fornecedor ou posição no estoque.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">↻</div>
+          <h3>Movimentação</h3>
+          <p>Registre entrada, alteração de local e histórico básico para melhorar a rastreabilidade.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="process" id="processo">
+      <div class="section-title">
+        <h2>Fluxo do sistema</h2>
+        <p>O processo foi pensado para reduzir retrabalho, troca de itens e divergência entre estoque físico e sistema.</p>
+      </div>
+
+      <div class="process-carousel">
+        <button class="carousel-btn" type="button" onclick="mudarSlide(-1)" aria-label="Voltar etapa">‹</button>
+
+        <div class="steps">
+          <div class="steps-track" id="fluxoTrack">
+            <div class="process-step active">
+              <div class="number">01</div>
+              <h3>Cadastro</h3>
+              <p>O operador registra os dados principais da matéria-prima, como código, lote, fornecedor, quantidade e localização.</p>
+            </div>
+
+            <div class="process-step">
+              <div class="number">02</div>
+              <h3>QR Code</h3>
+              <p>Após o cadastro, o sistema gera um QR Code exclusivo para identificar o material de forma rápida e padronizada.</p>
+            </div>
+
+            <div class="process-step">
+              <div class="number">03</div>
+              <h3>Etiqueta</h3>
+              <p>A etiqueta é impressa e fixada no material ou embalagem, evitando identificação manual incompleta ou ilegível.</p>
+            </div>
+
+            <div class="process-step">
+              <div class="number">04</div>
+              <h3>Conferência</h3>
+              <p>O operador escaneia o QR Code para validar os dados do material durante o recebimento ou movimentação.</p>
+            </div>
+
+            <div class="process-step">
+              <div class="number">05</div>
+              <h3>Rastreio</h3>
+              <p>O sistema mostra status, quantidade, localização e histórico, aumentando a confiabilidade do estoque.</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="carousel-btn" type="button" onclick="mudarSlide(1)" aria-label="Avançar etapa">›</button>
+      </div>
+
+      <div class="carousel-dots">
+        <button class="carousel-dot active" type="button" onclick="irParaSlide(0)" aria-label="Etapa 1"></button>
+        <button class="carousel-dot" type="button" onclick="irParaSlide(1)" aria-label="Etapa 2"></button>
+        <button class="carousel-dot" type="button" onclick="irParaSlide(2)" aria-label="Etapa 3"></button>
+        <button class="carousel-dot" type="button" onclick="irParaSlide(3)" aria-label="Etapa 4"></button>
+        <button class="carousel-dot" type="button" onclick="irParaSlide(4)" aria-label="Etapa 5"></button>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2>Base inicial para o projeto CodeStock</h2>
+      <p>
+        Essa home page pode ser usada como tela inicial do sistema. Depois, você pode criar as telas de login,
+        cadastro de matéria-prima, listagem, detalhes do item e impressão da etiqueta.
+      </p>
+
+      <a href="#inicio" class="btn-primary">Voltar ao início</a>
+    </section>
+  </main>
+
+  <footer>
+    <p><span>CodeStock</span> · Sistema de Identificação e Controle de Matéria-Prima</p>
+    <p>Projeto TCC · SENAI</p>
+  </footer>
+  <script src="../static/js/index.js"></script>
+</body>
+</html>

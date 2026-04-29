@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Etiquetas</title>
+
+  <link rel="stylesheet" href="../static/css/etiquetas.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <a class="logo" href="home.html">
+          <img src="../assets/img/logo1.png" alt="CodeStock Logo">
+        </a>
+
+        <div class="company-box">
+          <span>Empresa conectada</span>
+          <strong>Panasonic · Unidade MG</strong>
+        </div>
+
+        <nav class="menu">
+          <a href="home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 11l9-8 9 8"></path>
+              <path d="M5 10v11h14V10"></path>
+            </svg>
+            Home
+          </a>
+
+          <a href="materialcadastro.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 5v14"></path>
+              <path d="M5 12h14"></path>
+            </svg>
+            Cadastrar material
+          </a>
+
+          <a href="materiais.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <path d="M3.3 7 12 12l8.7-5"></path>
+              <path d="M12 22V12"></path>
+            </svg>
+            Materiais
+          </a>
+
+          <a href="etiquetas.html" class="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+              <path d="M14 14h2v2h-2zM18 14h3v3M14 18h3v3M19 19h2v2"></path>
+            </svg>
+            Etiquetas QR Code
+          </a>
+
+          <a href="movimentacoes.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 7H3"></path>
+              <path d="M7 3 3 7l4 4"></path>
+              <path d="M3 17h18"></path>
+              <path d="m17 13 4 4-4 4"></path>
+            </svg>
+            Movimentações
+          </a>
+
+          <a href="relatorios.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 3v18h18"></path>
+              <path d="m19 9-5 5-4-4-3 3"></path>
+            </svg>
+            Relatórios
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <span>Usuário logado</span>
+          <strong>Admin · Estoque</strong>
+        </div>
+        <a class="logout" href="login.html">Sair do sistema</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div>
+          <h1>Etiquetas QR Code</h1>
+          <p>Gere, visualize e imprima etiquetas padronizadas para rastreabilidade de matéria-prima.</p>
+        </div>
+
+        <span class="status">Identificação ativa</span>
+      </section>
+
+      <section class="metrics">
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon blue">▦</div>
+            <span>Etiquetas</span>
+          </div>
+          <strong>236</strong>
+          <small>QR Codes gerados</small>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon green">✓</div>
+            <span>Ativas</span>
+          </div>
+          <strong>218</strong>
+          <small>em uso no estoque</small>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon red">!</div>
+            <span>Pendentes</span>
+          </div>
+          <strong>12</strong>
+          <small>aguardando impressão</small>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon gray">↻</div>
+            <span>Reimpressões</span>
+          </div>
+          <strong>6</strong>
+          <small>solicitadas no mês</small>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Gerar nova etiqueta</h2>
+                <p>Informe os dados do material para criar uma etiqueta com QR Code e identificação padronizada.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="codigo">Código do material</label>
+                <input id="codigo" type="text" placeholder="Ex: MP-1024" oninput="atualizarPreview()">
+              </div>
+
+              <div class="form-group">
+                <label for="lote">Lote</label>
+                <input id="lote" type="text" placeholder="Ex: L2408" oninput="atualizarPreview()">
+              </div>
+
+              <div class="form-group">
+                <label for="descricao">Descrição</label>
+                <input id="descricao" type="text" placeholder="Ex: Resina ABS" oninput="atualizarPreview()">
+              </div>
+
+              <div class="form-group">
+                <label for="quantidade">Quantidade</label>
+                <input id="quantidade" type="text" placeholder="Ex: 120 kg" oninput="atualizarPreview()">
+              </div>
+
+              <div class="form-group">
+                <label for="localizacao">Localização</label>
+                <input id="localizacao" type="text" placeholder="Ex: Almoxarifado A3" oninput="atualizarPreview()">
+              </div>
+
+              <div class="form-group">
+                <label for="statusEtiqueta">Status</label>
+                <select id="statusEtiqueta" onchange="atualizarPreview()">
+                  <option>Ativa</option>
+                  <option>Gerada</option>
+                  <option>Pendente</option>
+                  <option>Reimpressão</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" type="button" onclick="gerarQR()">Gerar etiqueta</button>
+              <button class="btn-secondary" type="button" onclick="imprimirEtiqueta()">Imprimir etiqueta</button>
+              <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
+            </div>
+
+            <div class="success-message" id="successMessage">
+              Etiqueta gerada com sucesso. O QR Code já está pronto para impressão.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Etiquetas geradas</h2>
+                <p>Lista de identificações criadas para os materiais cadastrados.</p>
+              </div>
+            </div>
+
+            <div class="filters">
+              <input id="busca" type="text" placeholder="Buscar por código, lote ou material..." onkeyup="filtrarTabela()">
+              <select id="statusFiltro" onchange="filtrarTabela()">
+                <option value="">Todos os status</option>
+                <option>Ativa</option>
+                <option>Gerada</option>
+                <option>Pendente</option>
+                <option>Reimpressão</option>
+              </select>
+              <button class="btn-secondary" type="button" onclick="limparFiltros()">Limpar</button>
+            </div>
+
+            <div class="table-wrap">
+              <table class="table" id="etiquetasTabela">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Material</th>
+                    <th>Lote</th>
+                    <th>Localização</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td><strong>MP-1024</strong></td>
+                    <td>Resina ABS</td>
+                    <td>L2408</td>
+                    <td>Almoxarifado A3</td>
+                    <td><span class="tag ok">Ativa</span></td>
+                    <td><button class="action-btn">Imprimir</button></td>
+                  </tr>
+
+                  <tr>
+                    <td><strong>MP-2077</strong></td>
+                    <td>Componente eletrônico</td>
+                    <td>C7731</td>
+                    <td>Conferência</td>
+                    <td><span class="tag info">Gerada</span></td>
+                    <td><button class="action-btn">Imprimir</button></td>
+                  </tr>
+
+                  <tr>
+                    <td><strong>MP-3310</strong></td>
+                    <td>Embalagem técnica</td>
+                    <td>E9902</td>
+                    <td>Estoque B1</td>
+                    <td><span class="tag ok">Ativa</span></td>
+                    <td><button class="action-btn">Imprimir</button></td>
+                  </tr>
+
+                  <tr>
+                    <td><strong>MP-4481</strong></td>
+                    <td>Polímero industrial</td>
+                    <td>P1812</td>
+                    <td>Setor C2</td>
+                    <td><span class="tag alert">Pendente</span></td>
+                    <td><button class="action-btn">Imprimir</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel preview-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Prévia da etiqueta</h2>
+              <p>Modelo visual para impressão e fixação no material.</p>
+            </div>
+          </div>
+
+          <div class="label-preview" id="labelPreview">
+            <div class="label-header">
+              <img src="logo.png" alt="CodeStock Logo">
+              <span id="previewStatus">Ativa</span>
+            </div>
+
+            <div class="qr-area">
+              <div class="qr" id="qr"></div>
+            </div>
+
+            <div class="label-info">
+              <h3 id="previewCodigo">MP-0000</h3>
+              <p id="previewDescricao">Descrição do material</p>
+
+              <div class="label-grid">
+                <div>
+                  <span>Lote</span>
+                  <strong id="previewLote">—</strong>
+                </div>
+                <div>
+                  <span>Qtd.</span>
+                  <strong id="previewQuantidade">—</strong>
+                </div>
+                <div>
+                  <span>Local</span>
+                  <strong id="previewLocal">—</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tips">
+            <div class="tip-item">
+              <strong>Identificação padronizada</strong>
+              <small>Reduz falhas por etiquetas incompletas ou ilegíveis.</small>
+            </div>
+
+            <div class="tip-item">
+              <strong>Consulta rápida</strong>
+              <small>O QR Code facilita busca por lote, quantidade, status e localização.</small>
+            </div>
+
+            <div class="tip-item">
+              <strong>Rastreabilidade</strong>
+              <small>Conecta o material físico ao histórico registrado no sistema.</small>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+  <script src="../static/js/etiquetas.js"></script>
+</body>
+</html>

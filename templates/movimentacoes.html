@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Movimentações</title>
+  <link rel="stylesheet" href="../static/css/movimentacoes.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <a class="logo" href="home.html">
+          <img src="../assets/img/logo1.png" alt="CodeStock Logo">
+        </a>
+        <div class="company-box"><span>Empresa conectada</span><strong>Panasonic · Unidade MG</strong></div>
+        <nav class="menu">
+          <a href="home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 11l9-8 9 8"></path><path d="M5 10v11h14V10"></path>
+            </svg>
+            Home
+          </a>
+
+          <a href="materialcadastro.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 5v14"></path><path d="M5 12h14"></path>
+            </svg>
+            Cadastrar material
+          </a>
+
+          <a href="materiais.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <path d="M3.3 7 12 12l8.7-5"></path><path d="M12 22V12"></path>
+            </svg>
+            Materiais
+          </a>
+
+          <a href="etiquetas.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h2v2h-2zM18 14h3v3M14 18h3v3M19 19h2v2"></path>
+            </svg>
+            Etiquetas QR Code
+          </a>
+
+          <a href="movimentacoes.html" class="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 7H3"></path><path d="M7 3 3 7l4 4"></path><path d="M3 17h18"></path><path d="m17 13 4 4-4 4"></path>
+            </svg>
+            Movimentações
+          </a>
+
+          <a href="relatorios.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path>
+            </svg>
+            Relatórios
+          </a>
+        </nav>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-card"><span>Usuário logado</span><strong>Admin · Estoque</strong></div>
+        <a class="logout" href="login.html">Sair do sistema</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div><h1>Movimentações</h1><p>Registre entradas, saídas e mudanças de localização para manter a rastreabilidade do estoque.</p></div>
+        <span class="status">Controle ativo</span>
+      </section>
+
+      <section class="metrics">
+        <div class="metric-card"><div class="metric-top"><div class="metric-icon blue">↧</div><span>Entradas</span></div><strong>34</strong><small>registradas no mês</small></div>
+        <div class="metric-card"><div class="metric-top"><div class="metric-icon red">↥</div><span>Saídas</span></div><strong>24</strong><small>registradas no mês</small></div>
+        <div class="metric-card"><div class="metric-top"><div class="metric-icon green">↻</div><span>Transferências</span></div><strong>18</strong><small>mudanças de local</small></div>
+        <div class="metric-card"><div class="metric-top"><div class="metric-icon gray">!</div><span>Pendências</span></div><strong>7</strong><small>aguardando validação</small></div>
+      </section>
+
+      <section class="content-grid">
+        <div>
+          <form class="panel" id="movimentacaoForm">
+            <div class="panel-header"><div><h2>Nova movimentação</h2><p>Atualize o histórico do material e mantenha o estoque físico alinhado ao sistema.</p></div></div>
+            <div class="section-label">Dados da movimentação</div>
+
+            <div class="form-grid">
+              <div class="form-group"><label for="codigo">Código do material</label><div class="input-box"><input type="text" id="codigo" placeholder="Ex: MP-1024" required></div><span class="help-text">Pode ser digitado ou lido pela etiqueta QR Code.</span></div>
+              <div class="form-group"><label for="tipo">Tipo de movimentação</label><div class="input-box"><select id="tipo" required><option value="">Selecione</option><option>Entrada</option><option>Saída</option><option>Transferência</option><option>Correção de localização</option><option>Bloqueio de material</option></select></div></div>
+              <div class="form-group"><label for="origem">Local de origem</label><div class="input-box"><input type="text" id="origem" placeholder="Ex: Recebimento"></div></div>
+              <div class="form-group"><label for="destino">Local de destino</label><div class="input-box"><input type="text" id="destino" placeholder="Ex: Almoxarifado A3" required></div></div>
+              <div class="form-group"><label for="quantidade">Quantidade</label><div class="input-box"><input type="number" id="quantidade" placeholder="Ex: 20" required></div></div>
+              <div class="form-group"><label for="data">Data</label><div class="input-box"><input type="date" id="data" required></div></div>
+              <div class="form-group"><label for="responsavel">Responsável</label><div class="input-box"><input type="text" id="responsavel" placeholder="Ex: Admin Estoque" required></div></div>
+              <div class="form-group"><label for="validacao">Status da validação</label><div class="input-box"><select id="validacao" required><option>Validado</option><option>Pendente</option><option>Revisão necessária</option></select></div></div>
+              <div class="form-group full"><label for="observacao">Observação</label><div class="input-box"><textarea id="observacao" placeholder="Ex: Material transferido após conferência de recebimento."></textarea></div></div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" type="submit">Registrar movimentação</button>
+              <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar formulário</button>
+              <a href="materiais.html" class="btn-secondary">Consultar materiais</a>
+            </div>
+            <div class="success-message" id="successMessage">Movimentação registrada com sucesso no histórico do material.</div>
+          </form>
+
+          <section class="panel">
+            <div class="panel-header"><div><h2>Movimentações por semana</h2><p>Resumo visual fictício de entradas e saídas registradas.</p></div></div>
+            <div class="chart">
+              <div class="bar-group"><div class="bar entrada" style="height:72%;"></div><div class="bar saida" style="height:44%;"></div><small>Seg</small></div>
+              <div class="bar-group"><div class="bar entrada" style="height:58%;"></div><div class="bar saida" style="height:38%;"></div><small>Ter</small></div>
+              <div class="bar-group"><div class="bar entrada" style="height:86%;"></div><div class="bar saida" style="height:62%;"></div><small>Qua</small></div>
+              <div class="bar-group"><div class="bar entrada" style="height:66%;"></div><div class="bar saida" style="height:48%;"></div><small>Qui</small></div>
+              <div class="bar-group"><div class="bar entrada" style="height:78%;"></div><div class="bar saida" style="height:52%;"></div><small>Sex</small></div>
+            </div>
+            <div class="legend"><span><i class="entrada-dot"></i> Entradas</span><span><i class="saida-dot"></i> Saídas</span></div>
+          </section>
+        </div>
+
+        <div>
+          <section class="panel">
+            <div class="panel-header"><div><h2>Histórico recente</h2><p>Últimas ações registradas no controle de estoque.</p></div></div>
+            <div class="timeline">
+              <div class="timeline-item"><strong>MP-1024 · Entrada registrada</strong><small>120 kg recebidos no Almoxarifado A3 · Responsável: Admin Estoque</small></div>
+              <div class="timeline-item"><strong>MP-2077 · Transferência pendente</strong><small>500 un movidos para área de conferência · Validação aguardando responsável</small></div>
+              <div class="timeline-item"><strong>MP-3310 · Localização atualizada</strong><small>Material direcionado para Estoque B1 após conferência.</small></div>
+              <div class="timeline-item"><strong>MP-4481 · Bloqueio preventivo</strong><small>Lote P1812 bloqueado temporariamente para revisão de dados.</small></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header"><div><h2>Registros detalhados</h2><p>Tabela com movimentações recentes para consulta rápida.</p></div></div>
+            <div class="filters">
+              <div class="input-box"><input type="text" id="busca" placeholder="Buscar material..." onkeyup="filtrarTabela()"></div>
+              <div class="input-box"><select id="tipoFiltro" onchange="filtrarTabela()"><option value="">Tipo</option><option>Entrada</option><option>Saída</option><option>Transferência</option><option>Bloqueio</option></select></div>
+              <button class="btn-secondary" onclick="limparFiltros()">Limpar</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="movTabela">
+                <thead><tr><th>Tipo</th><th>Material</th><th>Origem</th><th>Destino</th><th>Qtd.</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="tag info">Entrada</span></td><td><div class="material-code"><div class="move-icon blue">↧</div>MP-1024</div></td><td>Recebimento</td><td>A3</td><td>120 kg</td><td><span class="tag ok">Validado</span></td></tr>
+                  <tr><td><span class="tag info">Transferência</span></td><td><div class="material-code"><div class="move-icon green">↻</div>MP-2077</div></td><td>Recebimento</td><td>Conferência</td><td>500 un</td><td><span class="tag alert">Pendente</span></td></tr>
+                  <tr><td><span class="tag alert">Saída</span></td><td><div class="material-code"><div class="move-icon red">↥</div>MP-3310</div></td><td>B1</td><td>Produção</td><td>20 un</td><td><span class="tag ok">Validado</span></td></tr>
+                  <tr><td><span class="tag gray">Bloqueio</span></td><td><div class="material-code"><div class="move-icon gray">!</div>MP-4481</div></td><td>C2</td><td>Qualidade</td><td>64 kg</td><td><span class="tag gray">Revisão</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="../static/js/movimentacoes.js"></script>
+</body>
+</html>

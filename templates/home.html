@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Home do Sistema</title>
+
+  <link rel="stylesheet" href="../static/css/home.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <a class="logo" href="home.html">
+          <img src="../assets/img/logo1.png" alt="CodeStock Logo">
+        </a>
+
+        <div class="company-box">
+          <span>Empresa conectada</span>
+          <strong>Panasonic · Unidade MG</strong>
+        </div>
+
+        <nav class="menu">
+          <a href="home.html" class="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 11l9-8 9 8"></path><path d="M5 10v11h14V10"></path>
+            </svg>
+            Home
+          </a>
+
+          <a href="materialcadastro.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 5v14"></path><path d="M5 12h14"></path>
+            </svg>
+            Cadastrar material
+          </a>
+
+          <a href="materiais.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <path d="M3.3 7 12 12l8.7-5"></path><path d="M12 22V12"></path>
+            </svg>
+            Materiais
+          </a>
+
+          <a href="etiquetas.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h2v2h-2zM18 14h3v3M14 18h3v3M19 19h2v2"></path>
+            </svg>
+            Etiquetas QR Code
+          </a>
+
+          <a href="movimentacoes.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 7H3"></path><path d="M7 3 3 7l4 4"></path><path d="M3 17h18"></path><path d="m17 13 4 4-4 4"></path>
+            </svg>
+            Movimentações
+          </a>
+
+          <a href="relatorios.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path>
+            </svg>
+            Relatórios
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <span>Usuário logado</span>
+          <strong>Admin · Estoque</strong>
+        </div>
+        <a class="logout" href="login.html">Sair do sistema</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div>
+          <h1>Home do sistema</h1>
+          <p>Resumo operacional para controle de matéria-prima, QR Code, localização e movimentações.</p>
+        </div>
+
+        <span class="status">Sistema online</span>
+      </section>
+
+      <section class="hero-panel">
+        <div>
+          <h2>Bem-vindo ao painel CodeStock</h2>
+          <p>
+            Acompanhe os materiais cadastrados, pendências de conferência, etiquetas geradas e movimentações recentes.
+            Esta tela serve como ponto inicial para operação do estoque e identificação de matéria-prima.
+          </p>
+
+          <div class="quick-buttons">
+            <a href="materialcadastro.html" class="btn-primary">+ Novo material</a>
+            <a href="etiquetas.html" class="btn-secondary">Gerar etiqueta</a>
+            <a href="materiais.html" class="btn-secondary">Consultar estoque</a>
+          </div>
+        </div>
+
+        <div class="scanner-card">
+          <div class="qr-visual"></div>
+          <div>
+            <h3>Leitura rápida por QR Code</h3>
+            <span>Escaneie a etiqueta para consultar dados, lote, quantidade, status e localização do material.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="metrics">
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              </svg>
+            </div>
+            <span>Materiais</span>
+          </div>
+          <strong>248</strong>
+          <small>itens cadastrados</small>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <path d="M12 9v4"></path><path d="M12 17h.01"></path>
+              </svg>
+            </div>
+            <span>Pendências</span>
+          </div>
+          <strong>12</strong>
+          <small>em conferência</small>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </div>
+            <span>Etiquetas</span>
+          </div>
+          <strong>236</strong>
+          <small>QR Codes gerados</small>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <div class="metric-icon gray">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 7H3"></path><path d="M7 3 3 7l4 4"></path><path d="M3 17h18"></path><path d="m17 13 4 4-4 4"></path>
+              </svg>
+            </div>
+            <span>Movimentações</span>
+          </div>
+          <strong>58</strong>
+          <small>registros no mês</small>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Materiais recentes</h2>
+              <p>Últimos registros cadastrados ou atualizados no estoque.</p>
+            </div>
+            <span class="tag info">Atualizado</span>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Material</th>
+                <th>Lote</th>
+                <th>Local</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MP-1024</td>
+                <td>Resina ABS</td>
+                <td>L2408</td>
+                <td>A3</td>
+                <td><span class="tag ok">Liberado</span></td>
+              </tr>
+              <tr>
+                <td>MP-2077</td>
+                <td>Componente eletrônico</td>
+                <td>C7731</td>
+                <td>Recebimento</td>
+                <td><span class="tag alert">Pendente</span></td>
+              </tr>
+              <tr>
+                <td>MP-3310</td>
+                <td>Embalagem técnica</td>
+                <td>E9902</td>
+                <td>B1</td>
+                <td><span class="tag ok">Localizado</span></td>
+              </tr>
+              <tr>
+                <td>MP-4481</td>
+                <td>Polímero industrial</td>
+                <td>P1812</td>
+                <td>C2</td>
+                <td><span class="tag info">Conferência</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Ações rápidas</h2>
+              <p>Atalhos principais para operação do sistema.</p>
+            </div>
+          </div>
+
+          <div class="actions-list">
+            <a class="action-card" href="materialcadastro.html">
+              <div class="metric-icon blue">+</div>
+              <div>
+                <strong>Cadastrar matéria-prima</strong>
+                <small>Registrar código, descrição, lote, fornecedor e localização.</small>
+              </div>
+            </a>
+
+            <a class="action-card" href="etiquetas.html">
+              <div class="metric-icon green">▦</div>
+              <div>
+                <strong>Gerar etiqueta QR Code</strong>
+                <small>Criar identificação padronizada para impressão.</small>
+              </div>
+            </a>
+
+            <a class="action-card" href="movimentacoes.html">
+              <div class="metric-icon red">↻</div>
+              <div>
+                <strong>Registrar movimentação</strong>
+                <small>Atualizar entrada, saída ou mudança de localização.</small>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Movimentações por semana</h2>
+            <p>Indicador visual fictício de entradas e saídas para base do dashboard.</p>
+          </div>
+        </div>
+
+        <div class="chart">
+          <div class="bar-group">
+            <div class="bar entrada" style="height: 72%;"></div>
+            <div class="bar saida" style="height: 44%;"></div>
+            <small>Seg</small>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar entrada" style="height: 58%;"></div>
+            <div class="bar saida" style="height: 38%;"></div>
+            <small>Ter</small>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar entrada" style="height: 86%;"></div>
+            <div class="bar saida" style="height: 62%;"></div>
+            <small>Qua</small>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar entrada" style="height: 66%;"></div>
+            <div class="bar saida" style="height: 48%;"></div>
+            <small>Qui</small>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar entrada" style="height: 78%;"></div>
+            <div class="bar saida" style="height: 52%;"></div>
+            <small>Sex</small>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span><i class="entrada-dot"></i> Entradas</span>
+          <span><i class="saida-dot"></i> Saídas</span>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="../static/js/home.js"></script>
+</body>
+</html>

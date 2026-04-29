@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Cadastro de Material</title>
+
+  <link rel="stylesheet" href="../static/css/relatorios.css">
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <a class="logo" href="home.html">
+          <img src="../assets/img/logo1.png" alt="CodeStock Logo">
+        </a>
+
+        <div class="company-box">
+          <span>Empresa conectada</span>
+          <strong>Panasonic · Unidade MG</strong>
+        </div>
+
+        <nav class="menu">
+          <a href="home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 11l9-8 9 8"></path><path d="M5 10v11h14V10"></path>
+            </svg>
+            Home
+          </a>
+
+          <a href="materialcadastro.html" class="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 5v14"></path><path d="M5 12h14"></path>
+            </svg>
+            Cadastrar material
+          </a>
+
+          <a href="materiais.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <path d="M3.3 7 12 12l8.7-5"></path><path d="M12 22V12"></path>
+            </svg>
+            Materiais
+          </a>
+
+          <a href="etiquetas.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h2v2h-2zM18 14h3v3M14 18h3v3M19 19h2v2"></path>
+            </svg>
+            Etiquetas QR Code
+          </a>
+
+          <a href="movimentacoes.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 7H3"></path><path d="M7 3 3 7l4 4"></path><path d="M3 17h18"></path><path d="m17 13 4 4-4 4"></path>
+            </svg>
+            Movimentações
+          </a>
+
+          <a href="relatorios.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path>
+            </svg>
+            Relatórios
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <span>Usuário logado</span>
+          <strong>Admin · Estoque</strong>
+        </div>
+        <a class="logout" href="login.html">Sair do sistema</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div>
+          <h1>Cadastro de material</h1>
+          <p>Registre uma nova matéria-prima, gere identificação padronizada e prepare a etiqueta com QR Code.</p>
+        </div>
+
+        <span class="status">Novo cadastro</span>
+      </section>
+
+      <section class="content-grid">
+        <div>
+          <form class="panel" id="materialForm">
+            <div class="panel-header">
+              <div>
+                <h2>Dados da matéria-prima</h2>
+                <p>Preencha as informações principais para evitar divergência de estoque e falhas de identificação.</p>
+              </div>
+            </div>
+
+            <div class="section-label">Identificação</div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="codigo">Código do material</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 8h10"></path><path d="M7 12h6"></path><path d="M7 16h4"></path>
+                  </svg>
+                  <input type="text" id="codigo" placeholder="Ex: MP-1024" required oninput="atualizarPreview()">
+                </div>
+                <span class="help-text">Use um código único para facilitar busca e rastreabilidade.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="descricao">Descrição do material</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h10"></path>
+                  </svg>
+                  <input type="text" id="descricao" placeholder="Ex: Resina ABS" required oninput="atualizarPreview()">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="lote">Lote</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  </svg>
+                  <input type="text" id="lote" placeholder="Ex: L2408" required oninput="atualizarPreview()">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="fornecedor">Fornecedor</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path>
+                  </svg>
+                  <input type="text" id="fornecedor" placeholder="Ex: Fornecedor A" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label">Quantidade e localização</div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="quantidade">Quantidade</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M3 3v18h18"></path><path d="M7 16V9"></path><path d="M12 16V5"></path><path d="M17 16v-4"></path>
+                  </svg>
+                  <input type="number" id="quantidade" placeholder="Ex: 120" required oninput="atualizarPreview()">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="unidade">Unidade</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M4 4h16v16H4z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h4"></path>
+                  </svg>
+                  <select id="unidade" required onchange="atualizarPreview()">
+                    <option value="">Selecione</option>
+                    <option value="kg">kg</option>
+                    <option value="un">un</option>
+                    <option value="L">L</option>
+                    <option value="m">m</option>
+                    <option value="cx">cx</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="localizacao">Localização</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <input type="text" id="localizacao" placeholder="Ex: Almoxarifado A3" required oninput="atualizarPreview()">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="status">Status inicial</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                  <select id="status" required>
+                    <option value="">Selecione</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Conferência">Conferência</option>
+                    <option value="Liberado">Liberado</option>
+                    <option value="Bloqueado">Bloqueado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label">Controle e observações</div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="dataEntrada">Data de entrada</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path>
+                  </svg>
+                  <input type="date" id="dataEntrada" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="responsavel">Responsável</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <input type="text" id="responsavel" placeholder="Ex: Admin Estoque" required>
+                </div>
+              </div>
+
+              <div class="form-group full">
+                <label for="observacao">Observações</label>
+                <div class="input-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M4 4h16v16H4z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path>
+                  </svg>
+                  <textarea id="observacao" placeholder="Ex: Material aguardando conferência de nota fiscal ou inspeção de qualidade."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" type="submit">Salvar material</button>
+              <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar formulário</button>
+              <a href="materiais.html" class="btn-secondary">Voltar para materiais</a>
+            </div>
+
+            <div class="success-message" id="successMessage">
+              Material cadastrado com sucesso. A etiqueta com QR Code já pode ser gerada.
+            </div>
+          </form>
+        </div>
+
+        <aside class="preview-card">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Prévia do cadastro</h2>
+                <p>Visualização resumida da etiqueta e das informações principais.</p>
+              </div>
+            </div>
+
+            <div class="material-preview">
+              <div class="preview-top">
+                <span class="preview-code" id="previewCodigo">MP-0000</span>
+                <h3 id="previewDescricao">Nova matéria-prima</h3>
+                <p id="previewTexto">Preencha os campos para visualizar os dados principais do material cadastrado.</p>
+              </div>
+
+              <div class="preview-footer">
+                <div class="preview-meta">
+                  <span id="previewLote">Lote: —</span>
+                  <span id="previewQtd">Quantidade: —</span>
+                  <span id="previewLocal">Local: —</span>
+                </div>
+                <div class="qr-preview"></div>
+              </div>
+            </div>
+
+            <div class="checklist">
+              <div class="check-item">
+                <div class="check-icon blue">1</div>
+                <div>
+                  <strong>Cadastro padronizado</strong>
+                  <small>Reduz troca de códigos, duplicidade e identificação manual incorreta.</small>
+                </div>
+              </div>
+
+              <div class="check-item">
+                <div class="check-icon green">2</div>
+                <div>
+                  <strong>QR Code automático</strong>
+                  <small>Após salvar, o material pode ser vinculado a uma etiqueta para impressão.</small>
+                </div>
+              </div>
+
+              <div class="check-item">
+                <div class="check-icon red">3</div>
+                <div>
+                  <strong>Histórico de movimentação</strong>
+                  <small>Serve como base para registrar entrada, localização e futuras alterações.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script src="../static/js/relatorios.js"></script>
+</body>
+</html>

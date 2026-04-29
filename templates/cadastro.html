@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Cadastro da Empresa</title>
+
+  <link rel="stylesheet" href="../static/css/cadastro.css">
+</head>
+
+<body>
+  <main class="page">
+    <section class="info-side">
+      <div class="info-content">
+        <div class="brand-row">
+          <a class="logo" href="index.html">
+            <img src="../assets/img/logo.png" alt="CodeStock Logo">
+          </a>
+
+          <span class="badge">Cadastro empresarial</span>
+        </div>
+
+        <h1>Cadastre sua empresa e comece a controlar a <span>matéria-prima</span>.</h1>
+
+        <p>
+          Esta etapa cria o acesso principal da organização. Depois do cadastro, a empresa poderá
+          acessar o sistema, criar usuários internos e gerenciar materiais, etiquetas QR Code e movimentações.
+        </p>
+
+        <div class="benefit-list">
+          <div class="benefit-item">
+            <div class="benefit-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <path d="M9 3v18"></path>
+                <path d="M15 3v18"></path>
+                <path d="M3 9h18"></path>
+                <path d="M3 15h18"></path>
+              </svg>
+            </div>
+            <div>
+              <strong>Ambiente exclusivo da empresa</strong>
+              <small>Cada organização mantém seus próprios materiais, lotes, usuários e movimentações.</small>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+            </div>
+            <div>
+              <strong>Administrador inicial</strong>
+              <small>O responsável cadastrado será o primeiro administrador da empresa no sistema.</small>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <div>
+              <strong>Menos erros operacionais</strong>
+              <small>O cadastro empresarial é a base para rastrear materiais e padronizar identificações.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <strong>CodeStock</strong> · Sistema de Identificação e Controle de Matéria-Prima
+      </div>
+    </section>
+
+    <section class="form-side">
+      <div class="register-card">
+        <div class="register-header">
+          <div>
+            <h2>Cadastro da empresa</h2>
+            <p>Preencha os dados para criar o ambiente empresarial no CodeStock.</p>
+          </div>
+
+          <span class="status">Novo acesso</span>
+        </div>
+
+        <form action="login.html" method="get">
+          <div class="section-label">Dados da empresa</div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="razao">Razão social</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V7l8-4v18"></path>
+                  <path d="M19 21V11l-6-4"></path>
+                </svg>
+                <input type="text" id="razao" name="razao" placeholder="Ex: CodeStock Tecnologia LTDA" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="fantasia">Nome fantasia</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 7h16"></path>
+                  <path d="M4 12h16"></path>
+                  <path d="M4 17h10"></path>
+                </svg>
+                <input type="text" id="fantasia" name="fantasia" placeholder="Ex: CodeStock">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="cnpj">CNPJ</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <path d="M9 3v18"></path>
+                  <path d="M15 3v18"></path>
+                  <path d="M3 9h18"></path>
+                  <path d="M3 15h18"></path>
+                </svg>
+                <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0001-00" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="segmento">Segmento</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3v18h18"></path>
+                  <path d="m19 9-5 5-4-4-3 3"></path>
+                </svg>
+                <select id="segmento" name="segmento" required>
+                  <option value="">Selecione</option>
+                  <option>Indústria</option>
+                  <option>Logística</option>
+                  <option>Almoxarifado</option>
+                  <option>Manufatura</option>
+                  <option>Outro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.16 11 19.79 19.79 0 0 1 .09 2.37 2 2 0 0 1 2.07.19h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L6 8.09a16 16 0 0 0 6.91 6.91l1.26-1.26a2 2 0 0 1 2.11-.45c.91.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="emailEmpresa">E-mail empresarial</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16v16H4z"></path>
+                  <path d="m22 6-10 7L2 6"></path>
+                </svg>
+                <input type="email" id="emailEmpresa" name="emailEmpresa" placeholder="empresa@dominio.com" required>
+              </div>
+            </div>
+
+            <div class="form-group full">
+              <label for="endereco">Endereço da unidade principal</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <input type="text" id="endereco" name="endereco" placeholder="Rua, número, bairro, cidade e estado">
+              </div>
+            </div>
+          </div>
+
+          <div class="section-label">Administrador responsável</div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="nomeAdmin">Nome completo</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="nomeAdmin" name="nomeAdmin" placeholder="Nome do responsável" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="cargoAdmin">Cargo</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+                  <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+                </svg>
+                <input type="text" id="cargoAdmin" name="cargoAdmin" placeholder="Ex: Supervisor de estoque">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="emailAdmin">E-mail do administrador</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16v16H4z"></path>
+                  <path d="m22 6-10 7L2 6"></path>
+                </svg>
+                <input type="email" id="emailAdmin" name="emailAdmin" placeholder="admin@empresa.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="matriculaAdmin">Matrícula/ID interno</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                  <path d="M7 8h10"></path>
+                  <path d="M7 12h6"></path>
+                  <path d="M7 16h4"></path>
+                </svg>
+                <input type="text" id="matriculaAdmin" name="matriculaAdmin" placeholder="Ex: ADM001">
+              </div>
+            </div>
+          </div>
+
+          <div class="section-label">Segurança do acesso empresarial</div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="senha">Senha empresarial</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="senha" name="senha" placeholder="Crie uma senha" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmarSenha">Confirmar senha</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <input type="password" id="confirmarSenha" name="confirmarSenha" placeholder="Repita a senha" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="password-rules">
+            <span><i></i> Mínimo de 8 caracteres</span>
+            <span><i></i> Letras e números</span>
+            <span><i></i> Uso recomendado de símbolo</span>
+            <span><i></i> Não compartilhar com operadores</span>
+          </div>
+
+          <label class="terms">
+            <input type="checkbox" required>
+            <span>
+              Confirmo que os dados informados são válidos e autorizo a criação do ambiente empresarial
+              no CodeStock. Li e aceito os <a href="#">termos de uso</a>.
+            </span>
+          </label>
+
+          <button class="btn-submit" type="submit">Cadastrar empresa</button>
+
+          <p class="login-link">
+            Empresa já cadastrada? <a href="login.html">Acessar login</a>
+          </p>
+        </form>
+      </div>
+    </section>
+  </main>
+  <script src="../static/js/cadastro.js"></script>
+</body>
+</html>
