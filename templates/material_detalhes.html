@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeStock | Material</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/materiais.css') }}">
+</head>
+
+<body>
+  <div class="main">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h1>{{ material.codigo }}</h1>
+          <p>{{ material.descricao }}</p>
+        </div>
+      </div>
+
+      <p><strong>Lote:</strong> {{ material.lote }}</p>
+      <p><strong>Fornecedor:</strong> {{ material.fornecedor }}</p>
+      <p><strong>Quantidade:</strong> {{ material.quantidade }} {{ material.unidade }}</p>
+      <p><strong>Localização:</strong> {{ material.localizacao }}</p>
+      <p><strong>Status:</strong> {{ material.status }}</p>
+      <p><strong>Responsável:</strong> {{ material.responsavel }}</p>
+      <p><strong>Observação:</strong> {{ material.observacao or "Sem observação" }}</p>
+
+      <br>
+
+      <img 
+        src="{{ url_for('gerar_qrcode_material', codigo=material.codigo) }}" 
+        alt="QR Code do material"
+        style="width: 180px;"
+      >
+
+      <br><br>
+
+      <a href="{{ url_for('materiais') }}" class="btn-secondary">Voltar</a>
+    </section>
+  </div>
+</body>
+</html>

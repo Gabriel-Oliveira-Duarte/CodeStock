@@ -18,7 +18,7 @@
 
         <div class="company-box">
           <span>Empresa conectada</span>
-          <strong>Panasonic · Unidade MG</strong>
+          <strong>{{ session.get('empresa_nome', 'Empresa') }}</strong>
         </div>
 
         <nav class="menu">
@@ -67,6 +67,19 @@
             Movimentações
           </a>
 
+          <a href="{{ url_for('scan') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M4 7V5a1 1 0 0 1 1-1h2"></path>
+              <path d="M17 4h2a1 1 0 0 1 1 1v2"></path>
+              <path d="M20 17v2a1 1 0 0 1-1 1h-2"></path>
+              <path d="M7 20H5a1 1 0 0 1-1-1v-2"></path>
+              <path d="M7 8h10"></path>
+              <path d="M7 12h10"></path>
+              <path d="M7 16h6"></path>
+            </svg>
+            Scanner QR
+          </a>
+
           <a href="{{ url_for('relatorios') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 3v18h18"></path>
@@ -80,9 +93,9 @@
       <div class="sidebar-footer">
         <div class="user-card">
           <span>Usuário logado</span>
-          <strong>Admin · Estoque</strong>
+          <strong>{{ session.get('usuario_nome', 'Usuário') }}</strong>
         </div>
-        <a class="logout" href="{{ url_for('login') }}">Sair do sistema</a>
+        <a class="logout" href="{{ url_for('logout') }}">Sair do sistema</a>
       </div>
     </aside>
 
@@ -96,13 +109,23 @@
         <span class="status">Identificação ativa</span>
       </section>
 
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+          <div class="flash-area">
+            {% for categoria, mensagem in mensagens %}
+              <div class="flash {{ categoria }}">{{ mensagem }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
       <section class="metrics">
         <div class="metric-card">
           <div class="metric-top">
             <div class="metric-icon blue">▦</div>
             <span>Etiquetas</span>
           </div>
-          <strong>236</strong>
+          <strong>{{ etiquetas|length }}</strong>
           <small>QR Codes gerados</small>
         </div>
 
@@ -111,7 +134,7 @@
             <div class="metric-icon green">✓</div>
             <span>Ativas</span>
           </div>
-          <strong>218</strong>
+          <strong>{{ etiquetas|selectattr('status', 'equalto', 'Ativa')|list|length }}</strong>
           <small>em uso no estoque</small>
         </div>
 
@@ -120,7 +143,7 @@
             <div class="metric-icon red">!</div>
             <span>Pendentes</span>
           </div>
-          <strong>12</strong>
+          <strong>{{ etiquetas|selectattr('status', 'equalto', 'Pendente')|list|length }}</strong>
           <small>aguardando impressão</small>
         </div>
 
@@ -129,8 +152,8 @@
             <div class="metric-icon gray">↻</div>
             <span>Reimpressões</span>
           </div>
-          <strong>6</strong>
-          <small>solicitadas no mês</small>
+          <strong>{{ etiquetas|selectattr('status', 'equalto', 'Reimpressão')|list|length }}</strong>
+          <small>solicitadas</small>
         </div>
       </section>
 
@@ -140,56 +163,71 @@
             <div class="panel-header">
               <div>
                 <h2>Gerar nova etiqueta</h2>
-                <p>Informe os dados do material para criar uma etiqueta com QR Code e identificação padronizada.</p>
+                <p>Selecione um material cadastrado para criar uma etiqueta com QR Code e identificação padronizada.</p>
               </div>
             </div>
 
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="codigo">Código do material</label>
-                <input id="codigo" type="text" placeholder="Ex: MP-1024" oninput="atualizarPreview()">
+            <form action="{{ url_for('etiquetas') }}" method="post">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="codigo">Código do material</label>
+                  <select id="codigo" name="codigo" required onchange="preencherMaterial()">
+                    <option value="">Selecione um material</option>
+                    {% for material in materiais %}
+                      <option
+                        value="{{ material.codigo }}"
+                        data-descricao="{{ material.descricao }}"
+                        data-lote="{{ material.lote }}"
+                        data-qtd="{{ material.quantidade }} {{ material.unidade }}"
+                        data-local="{{ material.localizacao }}"
+                      >
+                        {{ material.codigo }} - {{ material.descricao }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="lote">Lote</label>
+                  <input id="lote" name="lote" type="text" placeholder="Ex: L2408" oninput="atualizarPreview()" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="descricao">Descrição</label>
+                  <input id="descricao" name="descricao" type="text" placeholder="Ex: Resina ABS" oninput="atualizarPreview()" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="quantidade">Quantidade</label>
+                  <input id="quantidade" name="quantidade" type="text" placeholder="Ex: 120 kg" oninput="atualizarPreview()" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="localizacao">Localização</label>
+                  <input id="localizacao" name="localizacao" type="text" placeholder="Ex: Almoxarifado A3" oninput="atualizarPreview()" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="statusEtiqueta">Status</label>
+                  <select id="statusEtiqueta" name="statusEtiqueta" onchange="atualizarPreview()">
+                    <option>Ativa</option>
+                    <option>Gerada</option>
+                    <option>Pendente</option>
+                    <option>Reimpressão</option>
+                  </select>
+                </div>
               </div>
 
-              <div class="form-group">
-                <label for="lote">Lote</label>
-                <input id="lote" type="text" placeholder="Ex: L2408" oninput="atualizarPreview()">
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Gerar etiqueta</button>
+                <button class="btn-secondary" type="button" onclick="imprimirEtiqueta()">Imprimir etiqueta</button>
+                <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
               </div>
 
-              <div class="form-group">
-                <label for="descricao">Descrição</label>
-                <input id="descricao" type="text" placeholder="Ex: Resina ABS" oninput="atualizarPreview()">
+              <div class="success-message" id="successMessage">
+                Etiqueta gerada com sucesso. O QR Code já está pronto para impressão.
               </div>
-
-              <div class="form-group">
-                <label for="quantidade">Quantidade</label>
-                <input id="quantidade" type="text" placeholder="Ex: 120 kg" oninput="atualizarPreview()">
-              </div>
-
-              <div class="form-group">
-                <label for="localizacao">Localização</label>
-                <input id="localizacao" type="text" placeholder="Ex: Almoxarifado A3" oninput="atualizarPreview()">
-              </div>
-
-              <div class="form-group">
-                <label for="statusEtiqueta">Status</label>
-                <select id="statusEtiqueta" onchange="atualizarPreview()">
-                  <option>Ativa</option>
-                  <option>Gerada</option>
-                  <option>Pendente</option>
-                  <option>Reimpressão</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn-primary" type="button" onclick="gerarQR()">Gerar etiqueta</button>
-              <button class="btn-secondary" type="button" onclick="imprimirEtiqueta()">Imprimir etiqueta</button>
-              <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
-            </div>
-
-            <div class="success-message" id="successMessage">
-              Etiqueta gerada com sucesso. O QR Code já está pronto para impressão.
-            </div>
+            </form>
           </section>
 
           <section class="panel">
@@ -221,46 +259,61 @@
                     <th>Lote</th>
                     <th>Localização</th>
                     <th>Status</th>
+                    <th>QR Code</th>
                     <th>Ação</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  <tr>
-                    <td><strong>MP-1024</strong></td>
-                    <td>Resina ABS</td>
-                    <td>L2408</td>
-                    <td>Almoxarifado A3</td>
-                    <td><span class="tag ok">Ativa</span></td>
-                    <td><button class="action-btn">Imprimir</button></td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>MP-2077</strong></td>
-                    <td>Componente eletrônico</td>
-                    <td>C7731</td>
-                    <td>Conferência</td>
-                    <td><span class="tag info">Gerada</span></td>
-                    <td><button class="action-btn">Imprimir</button></td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>MP-3310</strong></td>
-                    <td>Embalagem técnica</td>
-                    <td>E9902</td>
-                    <td>Estoque B1</td>
-                    <td><span class="tag ok">Ativa</span></td>
-                    <td><button class="action-btn">Imprimir</button></td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>MP-4481</strong></td>
-                    <td>Polímero industrial</td>
-                    <td>P1812</td>
-                    <td>Setor C2</td>
-                    <td><span class="tag alert">Pendente</span></td>
-                    <td><button class="action-btn">Imprimir</button></td>
-                  </tr>
+                  {% if etiquetas %}
+                    {% for etiqueta in etiquetas %}
+                      <tr>
+                        <td><strong>{{ etiqueta.material_codigo }}</strong></td>
+                        <td>{{ etiqueta.descricao }}</td>
+                        <td>{{ etiqueta.lote }}</td>
+                        <td>{{ etiqueta.localizacao }}</td>
+                        <td>
+                          {% if etiqueta.status == 'Ativa' %}
+                            <span class="tag ok">Ativa</span>
+                          {% elif etiqueta.status == 'Gerada' %}
+                            <span class="tag info">Gerada</span>
+                          {% elif etiqueta.status == 'Pendente' %}
+                            <span class="tag alert">Pendente</span>
+                          {% elif etiqueta.status == 'Reimpressão' %}
+                            <span class="tag gray">Reimpressão</span>
+                          {% else %}
+                            <span class="tag gray">{{ etiqueta.status }}</span>
+                          {% endif %}
+                        </td>
+                        <td>
+                          <img
+                            src="{{ url_for('gerar_qrcode_material', codigo=etiqueta.material_codigo) }}"
+                            alt="QR Code {{ etiqueta.material_codigo }}"
+                            width="58"
+                          >
+                        </td>
+                        <td>
+                          <button 
+                          class="action-btn" 
+                          type="button"
+                          onclick="imprimirEtiquetaTabela(
+                            '{{ etiqueta.material_codigo }}',
+                            '{{ etiqueta.descricao }}',
+                            '{{ etiqueta.lote }}',
+                            '{{ etiqueta.quantidade }}',
+                            '{{ etiqueta.localizacao }}',
+                            '{{ etiqueta.status }}'
+                          )">
+                          Imprimir
+                        </button>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="7">Nenhuma etiqueta gerada ainda.</td>
+                    </tr>
+                  {% endif %}
                 </tbody>
               </table>
             </div>
@@ -326,6 +379,7 @@
       </section>
     </main>
   </div>
+
   <script src="{{ url_for('static', filename='js/etiquetas.js') }}"></script>
 </body>
 </html>

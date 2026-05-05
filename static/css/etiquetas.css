@@ -564,3 +564,157 @@ select:focus {
 }
 
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+
+/* ===== AJUSTE DO QR CODE NA PRÉVIA ===== */
+
+.qr-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr {
+  width: 190px;
+  height: 190px;
+  border: 2px solid var(--azul-principal);
+  border-radius: 14px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.qr img {
+  width: 165px !important;
+  height: 165px !important;
+  object-fit: contain !important;
+  display: block;
+}
+
+
+/* ===== IMPRESSÃO PROFISSIONAL DA ETIQUETA ===== */
+
+@media print {
+  body.modo-impressao-etiqueta * {
+    visibility: hidden !important;
+  }
+
+  body.modo-impressao-etiqueta #labelPreview,
+  body.modo-impressao-etiqueta #labelPreview * {
+    visibility: visible !important;
+  }
+
+  body.modo-impressao-etiqueta #labelPreview {
+    position: fixed !important;
+    top: 10mm !important;
+    left: 10mm !important;
+
+    width: 100mm !important;
+    height: 70mm !important;
+
+    padding: 5mm !important;
+    margin: 0 !important;
+
+    background: #ffffff !important;
+    border: 1.5px solid #07182c !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+
+    display: grid !important;
+    grid-template-rows: auto 1fr auto !important;
+    gap: 2mm !important;
+  }
+
+  body.modo-impressao-etiqueta .label-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 12mm !important;
+  }
+
+  body.modo-impressao-etiqueta .label-header img {
+    max-width: 28mm !important;
+    max-height: 11mm !important;
+    object-fit: contain !important;
+  }
+
+  body.modo-impressao-etiqueta #previewStatus {
+    font-size: 7pt !important;
+    padding: 2mm 3mm !important;
+    border-radius: 999px !important;
+  }
+
+  body.modo-impressao-etiqueta .qr-area {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.modo-impressao-etiqueta .qr {
+    width: 32mm !important;
+    height: 32mm !important;
+    border: 1px solid #2f7be5 !important;
+    border-radius: 3mm !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+  }
+
+  body.modo-impressao-etiqueta .qr img {
+    width: 29mm !important;
+    height: 29mm !important;
+    object-fit: contain !important;
+  }
+
+  body.modo-impressao-etiqueta .label-info {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.modo-impressao-etiqueta .label-info h3 {
+    font-size: 13pt !important;
+    line-height: 1 !important;
+    margin: 0 0 1mm 0 !important;
+  }
+
+  body.modo-impressao-etiqueta .label-info p {
+    font-size: 7pt !important;
+    line-height: 1.2 !important;
+    margin: 0 0 2mm 0 !important;
+  }
+
+  body.modo-impressao-etiqueta .label-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 2mm !important;
+    margin: 0 !important;
+  }
+
+  body.modo-impressao-etiqueta .label-grid div {
+    padding: 2mm !important;
+    border-radius: 3mm !important;
+    background: #f7f7f7 !important;
+    border: 1px solid #d8e2f0 !important;
+  }
+
+  body.modo-impressao-etiqueta .label-grid span {
+    font-size: 6pt !important;
+    display: block !important;
+  }
+
+  body.modo-impressao-etiqueta .label-grid strong {
+    font-size: 7.5pt !important;
+    display: block !important;
+    line-height: 1.1 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}

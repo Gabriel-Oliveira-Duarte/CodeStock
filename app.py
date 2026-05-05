@@ -3,6 +3,10 @@ import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import date
+from flask import send_file
+from io import BytesIO
+import qrcode
+from flask import request
 
 app = Flask(__name__)
 app.secret_key = "codestock_tcc_secret_key_2024"
@@ -31,7 +35,7 @@ def login_required(f):
     def decorated(*args, **kwargs):
         if "usuario_id" not in session:
             flash("Faça login para continuar.", "erro")
-            return redirect(url_for("login"))
+            return redirect(url_for("login", next=request.url))
         return f(*args, **kwargs)
     return decorated
 
@@ -240,7 +244,6 @@ def login():
         cursor.close()
         conn.close()
 
-
 @app.route("/logout")
 def logout():
     session.clear()
@@ -402,35 +405,94 @@ def movimentacoes():
 
         if not codigo or not tipo or not destino or not quantidade:
             flash("Preencha todos os campos obrigatórios.", "erro")
+
         elif conn:
-            cursor = conn.cursor()
+            cursor = conn.cursor(dictionary=True)
+
             try:
+                qtd = float(quantidade)
+                empresa_id = session["empresa_id"]
+
                 cursor.execute("""
-                    INSERT INTO movimentacoes
-                        (empresa_id, material_codigo, tipo, origem, destino,
-                         quantidade, data, responsavel, validacao, observacao)
-                    VALUES
-                        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (
-                    session["empresa_id"],
-                    codigo,
-                    tipo,
-                    origem,
-                    destino,
-                    float(quantidade),
-                    data,
-                    responsavel,
-                    validacao,
-                    observacao
-                ))
+                    SELECT codigo, quantidade, localizacao, status
+                    FROM materiais
+                    WHERE empresa_id = %s AND codigo = %s
+                """, (empresa_id, codigo))
+                material = cursor.fetchone()
 
-                conn.commit()
-                flash("Movimentação registrada com sucesso!", "sucesso")
+                if not material:
+                    flash("Material não encontrado. Verifique o código informado.", "erro")
+
+                elif tipo == "Saída" and float(material["quantidade"]) < qtd:
+                    flash("Estoque insuficiente para realizar a saída.", "erro")
+                
+                elif tipo in ["Saída", "Transferência", "Correção de localização"] and origem.strip().lower() != material["localizacao"].strip().lower():
+                    flash(f"Local de origem incorreto. O material está atualmente em: {material['localizacao']}", "erro")
+
+                else:
+                    cursor.execute("""
+                        INSERT INTO movimentacoes
+                            (empresa_id, material_codigo, tipo, origem, destino,
+                             quantidade, data, responsavel, validacao, observacao)
+                        VALUES
+                            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        empresa_id,
+                        codigo,
+                        tipo,
+                        origem,
+                        destino,
+                        qtd,
+                        data,
+                        responsavel,
+                        validacao,
+                        observacao
+                    ))
+
+                    if tipo == "Entrada":
+                        cursor.execute("""
+                            UPDATE materiais
+                            SET quantidade = quantidade + %s
+                            WHERE codigo = %s AND empresa_id = %s
+                        """, (qtd, codigo, empresa_id))
+
+                    elif tipo == "Saída":
+                        cursor.execute("""
+                            UPDATE materiais
+                            SET quantidade = quantidade - %s
+                            WHERE codigo = %s AND empresa_id = %s
+                        """, (qtd, codigo, empresa_id))
+
+                    elif tipo == "Transferência":
+                        cursor.execute("""
+                            UPDATE materiais
+                            SET localizacao = %s
+                            WHERE codigo = %s AND empresa_id = %s
+                        """, (destino, codigo, empresa_id))
+
+                    elif tipo == "Correção de localização":
+                        cursor.execute("""
+                            UPDATE materiais
+                            SET localizacao = %s
+                            WHERE codigo = %s AND empresa_id = %s
+                        """, (destino, codigo, empresa_id))
+
+                    elif tipo == "Bloqueio de material":
+                        cursor.execute("""
+                            UPDATE materiais
+                            SET status = 'Bloqueado'
+                            WHERE codigo = %s AND empresa_id = %s
+                        """, (codigo, empresa_id))
+
+                    conn.commit()
+                    flash("Movimentação registrada com sucesso!", "sucesso")
+
             except Exception as e:
+                conn.rollback()
                 flash(f"Erro ao registrar: {e}", "erro")
-            finally:
-                cursor.close()
 
+            finally:
+                cursor.close()        
     if conn:
         cursor = conn.cursor(dictionary=True)
         empresa_id = session["empresa_id"]
@@ -454,7 +516,14 @@ def movimentacoes():
 @login_required
 def etiquetas():
     conn = conectar_db()
-    lista = []
+    etiquetas_lista = []
+    materiais_lista = []
+
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return render_template("etiquetas.html", etiquetas=[], materiais=[])
+
+    empresa_id = session["empresa_id"]
 
     if request.method == "POST":
         codigo = request.form.get("codigo", "").strip()
@@ -464,49 +533,51 @@ def etiquetas():
         localizacao = request.form.get("localizacao", "").strip()
         status = request.form.get("statusEtiqueta", "Gerada").strip()
 
-        if not codigo or not lote:
-            flash("Informe ao menos o código e o lote.", "erro")
-        elif conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute("""
-                    INSERT INTO etiquetas
-                        (empresa_id, material_codigo, lote, descricao, quantidade, localizacao, status)
-                    VALUES
-                        (%s, %s, %s, %s, %s, %s, %s)
-                """, (
-                    session["empresa_id"],
-                    codigo,
-                    lote,
-                    descricao,
-                    quantidade,
-                    localizacao,
-                    status
-                ))
-
-                conn.commit()
-                flash("Etiqueta gerada com sucesso!", "sucesso")
-            except Exception as e:
-                flash(f"Erro ao gerar etiqueta: {e}", "erro")
-            finally:
-                cursor.close()
-
-    if conn:
-        cursor = conn.cursor(dictionary=True)
-        empresa_id = session["empresa_id"]
+        cursor = conn.cursor()
         try:
             cursor.execute("""
-                SELECT material_codigo, descricao, lote, localizacao, status
-                FROM etiquetas
-                WHERE empresa_id = %s
-                ORDER BY criado_em DESC
-            """, (empresa_id,))
-            lista = cursor.fetchall()
+                INSERT INTO etiquetas
+                    (empresa_id, material_codigo, lote, descricao, quantidade, localizacao, status)
+                VALUES
+                    (%s, %s, %s, %s, %s, %s, %s)
+            """, (empresa_id, codigo, lote, descricao, quantidade, localizacao, status))
+
+            conn.commit()
+            flash("Etiqueta gerada com sucesso!", "sucesso")
+            return redirect(url_for("etiquetas"))
+
+        except Exception as e:
+            flash(f"Erro ao gerar etiqueta: {e}", "erro")
         finally:
             cursor.close()
-            conn.close()
 
-    return render_template("etiquetas.html", etiquetas=lista)
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT codigo, descricao, lote, quantidade, unidade, localizacao, status
+            FROM materiais
+            WHERE empresa_id = %s
+            ORDER BY criado_em DESC
+        """, (empresa_id,))
+        materiais_lista = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT material_codigo, descricao, lote, quantidade, localizacao, status, criado_em
+            FROM etiquetas
+            WHERE empresa_id = %s
+            ORDER BY criado_em DESC
+        """, (empresa_id,))
+        etiquetas_lista = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        "etiquetas.html",
+        etiquetas=etiquetas_lista,
+        materiais=materiais_lista
+    )
 
 
 @app.route("/relatorios")
@@ -515,5 +586,54 @@ def relatorios():
     return render_template("relatorios.html")
 
 
+@app.route("/material/<codigo>")
+@login_required
+def visualizar_material(codigo):
+    conn = conectar_db()
+
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return redirect(url_for("materiais"))
+
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT *
+            FROM materiais
+            WHERE empresa_id = %s AND codigo = %s
+        """, (session["empresa_id"], codigo))
+
+        material = cursor.fetchone()
+
+        if not material:
+            flash("Material não encontrado.", "erro")
+            return redirect(url_for("materiais"))
+
+        return render_template("material_detalhes.html", material=material)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/qrcode/material/<codigo>")
+@login_required
+def gerar_qrcode_material(codigo):
+    url_material = request.host_url + f"material/{codigo}"
+
+    img = qrcode.make(url_material)
+
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return send_file(buffer, mimetype="image/png")
+
+@app.route("/scan")
+@login_required
+def scan():
+    return render_template("scan.html")
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
