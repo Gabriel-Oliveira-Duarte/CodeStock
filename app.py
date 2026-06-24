@@ -40,6 +40,25 @@ def login_required(f):
     return decorated
 
 
+def perfil_required(*perfis_permitidos):
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            perfil_usuario = session.get("usuario_perfil")
+
+            if perfil_usuario not in perfis_permitidos:
+                flash("Você não tem permissão para acessar esta página.", "erro")
+                return redirect(url_for("home"))
+
+            return f(*args, **kwargs)
+        return decorated
+    return decorator
+
+
+def admin_required(f):
+    return perfil_required("admin")(f)
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -57,23 +76,48 @@ def cadastro():
     telefone = request.form.get("telefone", "").strip()
     email_empresa = request.form.get("emailEmpresa", "").strip().lower()
     endereco = request.form.get("endereco", "").strip()
+
     nome_admin = request.form.get("nomeAdmin", "").strip()
     cargo_admin = request.form.get("cargoAdmin", "").strip()
     email_admin = request.form.get("emailAdmin", "").strip().lower()
     matricula = request.form.get("matriculaAdmin", "").strip() or "ADM001"
-    senha = request.form.get("senha", "")
-    confirmar = request.form.get("confirmarSenha", "")
 
-    if not razao or not cnpj or not email_empresa or not nome_admin or not email_admin or not senha:
+    senha_empresa = request.form.get("senha", "")
+    confirmar_empresa = request.form.get("confirmarSenha", "")
+    senha_admin = request.form.get("senhaAdmin", "")
+    confirmar_admin = request.form.get("confirmarSenhaAdmin", "")
+    termos = request.form.get("termos")
+
+    if not razao or not cnpj or not segmento or not email_empresa or not nome_admin or not email_admin:
         flash("Preencha todos os campos obrigatórios.", "erro")
         return render_template("cadastro.html")
 
-    if senha != confirmar:
-        flash("As senhas não coincidem.", "erro")
+    if not senha_empresa or not confirmar_empresa:
+        flash("Informe e confirme a senha empresarial.", "erro")
         return render_template("cadastro.html")
 
-    if len(senha) < 8:
-        flash("A senha deve ter no mínimo 8 caracteres.", "erro")
+    if not senha_admin or not confirmar_admin:
+        flash("Informe e confirme a senha do administrador.", "erro")
+        return render_template("cadastro.html")
+
+    if senha_empresa != confirmar_empresa:
+        flash("As senhas da empresa não coincidem.", "erro")
+        return render_template("cadastro.html")
+
+    if senha_admin != confirmar_admin:
+        flash("As senhas do administrador não coincidem.", "erro")
+        return render_template("cadastro.html")
+
+    if len(senha_empresa) < 8:
+        flash("A senha empresarial deve ter no mínimo 8 caracteres.", "erro")
+        return render_template("cadastro.html")
+
+    if len(senha_admin) < 8:
+        flash("A senha do administrador deve ter no mínimo 8 caracteres.", "erro")
+        return render_template("cadastro.html")
+
+    if not termos:
+        flash("Você precisa aceitar os termos para concluir o cadastro.", "erro")
         return render_template("cadastro.html")
 
     conn = conectar_db()
@@ -83,7 +127,8 @@ def cadastro():
 
     cursor = conn.cursor()
     try:
-        senha_hash = generate_password_hash(senha)
+        senha_empresa_hash = generate_password_hash(senha_empresa)
+        senha_admin_hash = generate_password_hash(senha_admin)
 
         cursor.execute("""
             INSERT INTO empresas
@@ -98,7 +143,7 @@ def cadastro():
             telefone,
             email_empresa,
             endereco,
-            senha_hash
+            senha_empresa_hash
         ))
 
         empresa_id = cursor.lastrowid
@@ -114,17 +159,19 @@ def cadastro():
             matricula,
             cargo_admin,
             email_admin,
-            senha_hash
+            senha_admin_hash
         ))
 
         conn.commit()
-        flash(f"Empresa cadastrada com sucesso! Use a matrícula {matricula} para acessar.", "sucesso")
+        flash(f"Empresa cadastrada com sucesso! Use a matrícula {matricula} e a senha do administrador para acessar.", "sucesso")
         return redirect(url_for("login"))
 
     except mysql.connector.IntegrityError:
-        flash("CNPJ ou e-mail já cadastrado no sistema.", "erro")
+        conn.rollback()
+        flash("CNPJ, e-mail empresarial ou matrícula já cadastrado no sistema.", "erro")
         return render_template("cadastro.html")
     except Exception as e:
+        conn.rollback()
         flash(f"Erro ao cadastrar: {e}", "erro")
         return render_template("cadastro.html")
     finally:
@@ -259,12 +306,20 @@ def home():
         "pendentes": 0,
         "total_etiquetas": 0,
         "total_movimentacoes": 0,
-        "materiais_recentes": []
+        "materiais_recentes": [],
+        "grafico_semana": {
+            "Seg": {"entrada": 0, "saida": 0},
+            "Ter": {"entrada": 0, "saida": 0},
+            "Qua": {"entrada": 0, "saida": 0},
+            "Qui": {"entrada": 0, "saida": 0},
+            "Sex": {"entrada": 0, "saida": 0}
+        }
     }
 
     if conn:
         cursor = conn.cursor(dictionary=True)
         empresa_id = session["empresa_id"]
+
         try:
             cursor.execute("SELECT COUNT(*) AS total FROM materiais WHERE empresa_id = %s", (empresa_id,))
             dados["total_materiais"] = cursor.fetchone()["total"]
@@ -289,9 +344,49 @@ def home():
                 LIMIT 5
             """, (empresa_id,))
             dados["materiais_recentes"] = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT
+                    DAYOFWEEK(data) AS dia_semana,
+                    tipo,
+                    COUNT(*) AS total
+                FROM movimentacoes
+                WHERE empresa_id = %s
+                  AND data >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                  AND tipo IN ('Entrada', 'Saída')
+                GROUP BY dia_semana, tipo
+            """, (empresa_id,))
+
+            mapa_dias = {
+                2: "Seg",
+                3: "Ter",
+                4: "Qua",
+                5: "Qui",
+                6: "Sex"
+            }
+
+            for item in cursor.fetchall():
+                dia = mapa_dias.get(item["dia_semana"])
+
+                if dia:
+                    if item["tipo"] == "Entrada":
+                        dados["grafico_semana"][dia]["entrada"] = item["total"]
+                    elif item["tipo"] == "Saída":
+                        dados["grafico_semana"][dia]["saida"] = item["total"]
+
         finally:
             cursor.close()
             conn.close()
+
+    altura_grafico = {}
+
+    for dia, valores in dados["grafico_semana"].items():
+        altura_grafico[dia] = {
+            "entrada": max(valores["entrada"] * 20, 6),
+            "saida": max(valores["saida"] * 20, 6)
+        }
+
+    dados["altura_grafico"] = altura_grafico
 
     return render_template("home.html", **dados)
 
@@ -323,6 +418,7 @@ def materiais():
 
 @app.route("/materialcadastro", methods=["GET", "POST"])
 @login_required
+@perfil_required("admin", "operador")
 def materialcadastro():
     if request.method == "GET":
         return render_template("materialcadastro.html")
@@ -388,6 +484,7 @@ def materialcadastro():
 
 @app.route("/movimentacoes", methods=["GET", "POST"])
 @login_required
+@perfil_required("admin", "operador", "conferente")
 def movimentacoes():
     conn = conectar_db()
     lista = []
@@ -514,6 +611,7 @@ def movimentacoes():
 
 @app.route("/etiquetas", methods=["GET", "POST"])
 @login_required
+@perfil_required("admin", "operador")
 def etiquetas():
     conn = conectar_db()
     etiquetas_lista = []
@@ -580,8 +678,231 @@ def etiquetas():
     )
 
 
+@app.route("/usuarios", methods=["GET", "POST"])
+@login_required
+@perfil_required("admin")
+def usuarios():
+    conn = conectar_db()
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return redirect(url_for("home"))
+
+    empresa_id = session["empresa_id"]
+    perfis_validos = ["admin", "operador", "conferente"]
+
+    if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        matricula = request.form.get("matricula", "").strip()
+        cargo = request.form.get("cargo", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        perfil = request.form.get("perfil", "operador").strip()
+        senha = request.form.get("senha", "")
+        confirmar_senha = request.form.get("confirmarSenha", "")
+
+        if not nome or not matricula or not perfil or not senha:
+            flash("Preencha nome, matrícula, perfil e senha.", "erro")
+            conn.close()
+            return redirect(url_for("usuarios"))
+
+        if perfil not in perfis_validos:
+            flash("Perfil inválido.", "erro")
+            conn.close()
+            return redirect(url_for("usuarios"))
+
+        if senha != confirmar_senha:
+            flash("As senhas do usuário não coincidem.", "erro")
+            conn.close()
+            return redirect(url_for("usuarios"))
+
+        if len(senha) < 8:
+            flash("A senha do usuário deve ter no mínimo 8 caracteres.", "erro")
+            conn.close()
+            return redirect(url_for("usuarios"))
+
+        cursor = conn.cursor()
+        try:
+            senha_hash = generate_password_hash(senha)
+            cursor.execute("""
+                INSERT INTO usuarios
+                    (empresa_id, nome, matricula, cargo, email, perfil, senha_hash)
+                VALUES
+                    (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                empresa_id,
+                nome,
+                matricula,
+                cargo,
+                email,
+                perfil,
+                senha_hash
+            ))
+            conn.commit()
+            flash("Usuário cadastrado com sucesso!", "sucesso")
+        except mysql.connector.IntegrityError:
+            conn.rollback()
+            flash("Já existe um usuário com essa matrícula nesta empresa.", "erro")
+        except Exception as e:
+            conn.rollback()
+            flash(f"Erro ao cadastrar usuário: {e}", "erro")
+        finally:
+            cursor.close()
+
+        conn.close()
+        return redirect(url_for("usuarios"))
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT id, nome, matricula, cargo, email, perfil, criado_em
+            FROM usuarios
+            WHERE empresa_id = %s
+            ORDER BY criado_em DESC
+        """, (empresa_id,))
+        lista_usuarios = cursor.fetchall()
+
+        cursor.execute("SELECT COUNT(*) AS total FROM usuarios WHERE empresa_id = %s", (empresa_id,))
+        total_usuarios = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) AS total FROM usuarios WHERE empresa_id = %s AND perfil = 'admin'", (empresa_id,))
+        total_admins = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) AS total FROM usuarios WHERE empresa_id = %s AND perfil = 'operador'", (empresa_id,))
+        total_operadores = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) AS total FROM usuarios WHERE empresa_id = %s AND perfil = 'conferente'", (empresa_id,))
+        total_conferentes = cursor.fetchone()["total"]
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template(
+        "usuarios.html",
+        usuarios=lista_usuarios,
+        total_usuarios=total_usuarios,
+        total_admins=total_admins,
+        total_operadores=total_operadores,
+        total_conferentes=total_conferentes
+    )
+
+
+@app.route("/usuarios/editar/<int:usuario_id>", methods=["POST"])
+@login_required
+@perfil_required("admin")
+def editar_usuario(usuario_id):
+    nome = request.form.get("nome", "").strip()
+    matricula = request.form.get("matricula", "").strip()
+    cargo = request.form.get("cargo", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    perfil = request.form.get("perfil", "operador").strip()
+    senha = request.form.get("senha", "")
+    confirmar_senha = request.form.get("confirmarSenha", "")
+
+    perfis_validos = ["admin", "operador", "conferente"]
+
+    if not nome or not matricula or perfil not in perfis_validos:
+        flash("Preencha nome, matrícula e perfil corretamente.", "erro")
+        return redirect(url_for("usuarios"))
+
+    if senha and senha != confirmar_senha:
+        flash("As novas senhas não coincidem.", "erro")
+        return redirect(url_for("usuarios"))
+
+    if senha and len(senha) < 8:
+        flash("A nova senha deve ter no mínimo 8 caracteres.", "erro")
+        return redirect(url_for("usuarios"))
+
+    conn = conectar_db()
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return redirect(url_for("usuarios"))
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT id, perfil FROM usuarios WHERE id = %s AND empresa_id = %s",
+            (usuario_id, session["empresa_id"])
+        )
+        usuario_atual = cursor.fetchone()
+
+        if not usuario_atual:
+            flash("Usuário não encontrado.", "erro")
+            return redirect(url_for("usuarios"))
+
+        if usuario_id == session.get("usuario_id") and perfil != "admin":
+            flash("Você não pode remover o próprio perfil de administrador.", "erro")
+            return redirect(url_for("usuarios"))
+
+        if senha:
+            senha_hash = generate_password_hash(senha)
+            cursor.execute("""
+                UPDATE usuarios
+                SET nome = %s, matricula = %s, cargo = %s, email = %s, perfil = %s, senha_hash = %s
+                WHERE id = %s AND empresa_id = %s
+            """, (
+                nome, matricula, cargo, email, perfil, senha_hash, usuario_id, session["empresa_id"]
+            ))
+        else:
+            cursor.execute("""
+                UPDATE usuarios
+                SET nome = %s, matricula = %s, cargo = %s, email = %s, perfil = %s
+                WHERE id = %s AND empresa_id = %s
+            """, (
+                nome, matricula, cargo, email, perfil, usuario_id, session["empresa_id"]
+            ))
+
+        conn.commit()
+        flash("Usuário atualizado com sucesso!", "sucesso")
+    except mysql.connector.IntegrityError:
+        conn.rollback()
+        flash("Já existe outro usuário com essa matrícula nesta empresa.", "erro")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Erro ao editar usuário: {e}", "erro")
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("usuarios"))
+
+
+@app.route("/usuarios/excluir/<int:usuario_id>", methods=["POST"])
+@login_required
+@perfil_required("admin")
+def excluir_usuario(usuario_id):
+    if usuario_id == session.get("usuario_id"):
+        flash("Você não pode excluir o próprio usuário logado.", "erro")
+        return redirect(url_for("usuarios"))
+
+    conn = conectar_db()
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return redirect(url_for("usuarios"))
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "DELETE FROM usuarios WHERE id = %s AND empresa_id = %s",
+            (usuario_id, session["empresa_id"])
+        )
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            flash("Usuário não encontrado.", "erro")
+        else:
+            flash("Usuário excluído com sucesso!", "sucesso")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Erro ao excluir usuário: {e}", "erro")
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("usuarios"))
+
+
 @app.route("/relatorios")
 @login_required
+@perfil_required("admin")
 def relatorios():
     return render_template("relatorios.html")
 

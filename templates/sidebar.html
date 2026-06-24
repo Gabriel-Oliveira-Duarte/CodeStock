@@ -1,0 +1,116 @@
+<aside class="sidebar" id="sidebar">
+  <div>
+    <a class="logo" href="{{ url_for('home') }}">
+      <img src="{{ url_for('static', filename='assets/img/logo1.png') }}" alt="CodeStock Logo">
+    </a>
+
+    <div class="company-box">
+      <span>Empresa conectada</span>
+      <strong>{{ session["empresa_nome"] }}</strong>
+    </div>
+
+    <nav class="menu">
+      <a href="{{ url_for('home') }}"
+         class="{% if request.endpoint == 'home' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M3 11l9-8 9 8"></path>
+          <path d="M5 10v11h14V10"></path>
+        </svg>
+        Home
+      </a>
+
+      {% if session.get("usuario_perfil") in ["admin", "operador"] %}
+      <a href="{{ url_for('materialcadastro') }}"
+         class="{% if request.endpoint == 'materialcadastro' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 5v14"></path>
+          <path d="M5 12h14"></path>
+        </svg>
+        Cadastrar material
+      </a>
+      {% endif %}
+
+      <a href="{{ url_for('materiais') }}"
+         class="{% if request.endpoint in ['materiais', 'visualizar_material'] %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <path d="M3.3 7 12 12l8.7-5"></path>
+          <path d="M12 22V12"></path>
+        </svg>
+        Materiais
+      </a>
+
+      {% if session.get("usuario_perfil") in ["admin", "operador"] %}
+      <a href="{{ url_for('etiquetas') }}"
+         class="{% if request.endpoint == 'etiquetas' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+          <path d="M14 14h2v2h-2zM18 14h3v3M14 18h3v3M19 19h2v2"></path>
+        </svg>
+        Etiquetas QR Code
+      </a>
+      {% endif %}
+
+      {% if session.get("usuario_perfil") in ["admin", "operador", "conferente"] %}
+      <a href="{{ url_for('movimentacoes') }}"
+         class="{% if request.endpoint == 'movimentacoes' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 7H3"></path>
+          <path d="M7 3 3 7l4 4"></path>
+          <path d="M3 17h18"></path>
+          <path d="m17 13 4 4-4 4"></path>
+        </svg>
+        Movimentações
+      </a>
+      {% endif %}
+
+      <a href="{{ url_for('scan') }}"
+         class="{% if request.endpoint == 'scan' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M4 7V5a1 1 0 0 1 1-1h2"></path>
+          <path d="M17 4h2a1 1 0 0 1 1 1v2"></path>
+          <path d="M20 17v2a1 1 0 0 1-1 1h-2"></path>
+          <path d="M7 20H5a1 1 0 0 1-1-1v-2"></path>
+          <path d="M7 8h10"></path>
+          <path d="M7 12h10"></path>
+          <path d="M7 16h6"></path>
+        </svg>
+        Scanner QR
+      </a>
+
+      {% if session.get("usuario_perfil") == "admin" %}
+      <a href="{{ url_for('relatorios') }}"
+         class="{% if request.endpoint == 'relatorios' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M3 3v18h18"></path>
+          <path d="m19 9-5 5-4-4-3 3"></path>
+        </svg>
+        Relatórios
+      </a>
+
+      
+      <a href="{{ url_for('usuarios') }}"
+         class="{% if request.endpoint in ['usuarios', 'editar_usuario', 'excluir_usuario'] %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Usuários
+      </a>
+      {% endif %}
+    </nav>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <span>Usuário logado</span>
+      <strong>{{ session["usuario_nome"] }} · {{ session["usuario_perfil"]|capitalize }}</strong>
+    </div>
+
+    <a class="logout" href="{{ url_for('logout') }}">Sair do sistema</a>
+  </div>
+</aside>
