@@ -678,126 +678,319 @@ def materialcadastro():
 @perfil_required("admin", "operador", "conferente")
 def movimentacoes():
     conn = conectar_db()
-    lista = []
+
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return render_template(
+            "movimentacoes.html",
+            movimentacoes=[],
+            materiais=[],
+            filtros={},
+            resumo={
+                "entradas_hoje": 0,
+                "saidas_hoje": 0,
+                "transferencias_hoje": 0,
+                "bloqueios_hoje": 0
+            },
+            altura_grafico={
+                "Seg": {"entrada": 6, "saida": 6},
+                "Ter": {"entrada": 6, "saida": 6},
+                "Qua": {"entrada": 6, "saida": 6},
+                "Qui": {"entrada": 6, "saida": 6},
+                "Sex": {"entrada": 6, "saida": 6}
+            }
+        )
+
+    empresa_id = session["empresa_id"]
 
     if request.method == "POST":
         codigo = request.form.get("codigo", "").strip()
         tipo = request.form.get("tipo", "").strip()
         origem = request.form.get("origem", "").strip()
         destino = request.form.get("destino", "").strip()
-        quantidade = request.form.get("quantidade", "0")
-        data = request.form.get("data", str(date.today()))
-        responsavel = request.form.get("responsavel", "").strip()
-        validacao = request.form.get("validacao", "Pendente").strip()
+        quantidade = request.form.get("quantidade", "0").strip()
+        data_mov = request.form.get("data", str(date.today())).strip()
+        responsavel = session.get("usuario_nome", "Sistema")
+        validacao = request.form.get("validacao", "Validado").strip()
         observacao = request.form.get("observacao", "").strip()
 
-        if not codigo or not tipo or not destino or not quantidade:
-            flash("Preencha todos os campos obrigatórios.", "erro")
+        tipos_validos = [
+            "Entrada",
+            "Saída",
+            "Transferência",
+            "Correção de localização",
+            "Bloqueio de material"
+        ]
 
-        elif conn:
-            cursor = conn.cursor(dictionary=True)
+        validacoes_validas = ["Validado", "Pendente", "Revisão necessária"]
 
-            try:
-                qtd = float(quantidade)
-                empresa_id = session["empresa_id"]
+        if not codigo or not tipo or not quantidade:
+            flash("Informe o material, o tipo de movimentação e a quantidade.", "erro")
+            conn.close()
+            return redirect(url_for("movimentacoes"))
 
-                cursor.execute("""
-                    SELECT codigo, quantidade, localizacao, status
-                    FROM materiais
-                    WHERE empresa_id = %s AND codigo = %s
-                """, (empresa_id, codigo))
-                material = cursor.fetchone()
+        if tipo not in tipos_validos:
+            flash("Tipo de movimentação inválido.", "erro")
+            conn.close()
+            return redirect(url_for("movimentacoes"))
 
-                if not material:
-                    flash("Material não encontrado. Verifique o código informado.", "erro")
+        if validacao not in validacoes_validas:
+            flash("Status de validação inválido.", "erro")
+            conn.close()
+            return redirect(url_for("movimentacoes"))
 
-                elif tipo == "Saída" and float(material["quantidade"]) < qtd:
-                    flash("Estoque insuficiente para realizar a saída.", "erro")
-                
-                elif tipo in ["Saída", "Transferência", "Correção de localização"] and origem.strip().lower() != material["localizacao"].strip().lower():
-                    flash(f"Local de origem incorreto. O material está atualmente em: {material['localizacao']}", "erro")
+        try:
+            qtd = float(quantidade.replace(",", "."))
+        except ValueError:
+            flash("Quantidade inválida.", "erro")
+            conn.close()
+            return redirect(url_for("movimentacoes"))
 
-                else:
-                    cursor.execute("""
-                        INSERT INTO movimentacoes
-                            (empresa_id, material_codigo, tipo, origem, destino,
-                             quantidade, data, responsavel, validacao, observacao)
-                        VALUES
-                            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, (
-                        empresa_id,
-                        codigo,
-                        tipo,
-                        origem,
-                        destino,
-                        qtd,
-                        data,
-                        responsavel,
-                        validacao,
-                        observacao
-                    ))
+        if qtd <= 0:
+            flash("A quantidade deve ser maior que zero.", "erro")
+            conn.close()
+            return redirect(url_for("movimentacoes"))
 
-                    if tipo == "Entrada":
-                        cursor.execute("""
-                            UPDATE materiais
-                            SET quantidade = quantidade + %s
-                            WHERE codigo = %s AND empresa_id = %s
-                        """, (qtd, codigo, empresa_id))
+        if tipo in ["Entrada", "Transferência", "Correção de localização"] and not destino:
+            flash("Informe o local de destino para este tipo de movimentação.", "erro")
+            conn.close()
+            return redirect(url_for("movimentacoes"))
 
-                    elif tipo == "Saída":
-                        cursor.execute("""
-                            UPDATE materiais
-                            SET quantidade = quantidade - %s
-                            WHERE codigo = %s AND empresa_id = %s
-                        """, (qtd, codigo, empresa_id))
-
-                    elif tipo == "Transferência":
-                        cursor.execute("""
-                            UPDATE materiais
-                            SET localizacao = %s
-                            WHERE codigo = %s AND empresa_id = %s
-                        """, (destino, codigo, empresa_id))
-
-                    elif tipo == "Correção de localização":
-                        cursor.execute("""
-                            UPDATE materiais
-                            SET localizacao = %s
-                            WHERE codigo = %s AND empresa_id = %s
-                        """, (destino, codigo, empresa_id))
-
-                    elif tipo == "Bloqueio de material":
-                        cursor.execute("""
-                            UPDATE materiais
-                            SET status = 'Bloqueado'
-                            WHERE codigo = %s AND empresa_id = %s
-                        """, (codigo, empresa_id))
-
-                    conn.commit()
-                    flash("Movimentação registrada com sucesso!", "sucesso")
-
-            except Exception as e:
-                conn.rollback()
-                flash(f"Erro ao registrar: {e}", "erro")
-
-            finally:
-                cursor.close()        
-    if conn:
         cursor = conn.cursor(dictionary=True)
-        empresa_id = session["empresa_id"]
+
         try:
             cursor.execute("""
-                SELECT tipo, material_codigo, origem, destino, quantidade, validacao, data
-                FROM movimentacoes
-                WHERE empresa_id = %s
-                ORDER BY criado_em DESC
-                LIMIT 50
-            """, (empresa_id,))
-            lista = cursor.fetchall()
+                SELECT codigo, descricao, quantidade, localizacao, status
+                FROM materiais
+                WHERE empresa_id = %s AND codigo = %s
+            """, (empresa_id, codigo))
+            material = cursor.fetchone()
+
+            if not material:
+                flash("Material não encontrado. Verifique o código informado.", "erro")
+                return redirect(url_for("movimentacoes"))
+
+            local_atual = (material.get("localizacao") or "").strip()
+
+            if tipo in ["Saída", "Transferência", "Correção de localização"]:
+                if not origem:
+                    flash(f"Informe a origem. O material está atualmente em: {local_atual or 'sem localização cadastrada'}", "erro")
+                    return redirect(url_for("movimentacoes"))
+
+                if origem.lower() != local_atual.lower():
+                    flash(f"Local de origem incorreto. O material está atualmente em: {local_atual}", "erro")
+                    return redirect(url_for("movimentacoes"))
+
+            if tipo == "Saída" and float(material["quantidade"] or 0) < qtd:
+                flash("Estoque insuficiente para realizar a saída.", "erro")
+                return redirect(url_for("movimentacoes"))
+
+            if tipo == "Entrada" and not origem:
+                origem = "Entrada externa"
+
+            if tipo == "Saída" and not destino:
+                destino = "Saída do estoque"
+
+            if tipo == "Bloqueio de material":
+                origem = origem or local_atual
+                destino = destino or local_atual
+
+            cursor.execute("""
+                INSERT INTO movimentacoes
+                    (empresa_id, material_codigo, tipo, origem, destino,
+                     quantidade, data, responsavel, validacao, observacao)
+                VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                empresa_id,
+                codigo,
+                tipo,
+                origem,
+                destino,
+                qtd,
+                data_mov,
+                responsavel,
+                validacao,
+                observacao
+            ))
+
+            if tipo == "Entrada":
+                cursor.execute("""
+                    UPDATE materiais
+                    SET quantidade = quantidade + %s,
+                        localizacao = %s
+                    WHERE codigo = %s AND empresa_id = %s
+                """, (qtd, destino, codigo, empresa_id))
+
+            elif tipo == "Saída":
+                cursor.execute("""
+                    UPDATE materiais
+                    SET quantidade = quantidade - %s
+                    WHERE codigo = %s AND empresa_id = %s
+                """, (qtd, codigo, empresa_id))
+
+            elif tipo in ["Transferência", "Correção de localização"]:
+                cursor.execute("""
+                    UPDATE materiais
+                    SET localizacao = %s
+                    WHERE codigo = %s AND empresa_id = %s
+                """, (destino, codigo, empresa_id))
+
+            elif tipo == "Bloqueio de material":
+                cursor.execute("""
+                    UPDATE materiais
+                    SET status = 'Bloqueado'
+                    WHERE codigo = %s AND empresa_id = %s
+                """, (codigo, empresa_id))
+
+            conn.commit()
+            flash("Movimentação registrada com sucesso!", "sucesso")
+
+        except Exception as e:
+            conn.rollback()
+            flash(f"Erro ao registrar movimentação: {e}", "erro")
         finally:
             cursor.close()
-            conn.close()
 
-    return render_template("movimentacoes.html", movimentacoes=lista)
+        conn.close()
+        return redirect(url_for("movimentacoes"))
+
+    filtros = {
+        "busca": request.args.get("busca", "").strip(),
+        "tipo": request.args.get("tipo", "").strip(),
+        "data_inicio": request.args.get("data_inicio", "").strip(),
+        "data_fim": request.args.get("data_fim", "").strip()
+    }
+
+    lista = []
+    materiais_lista = []
+    resumo = {
+        "entradas_hoje": 0,
+        "saidas_hoje": 0,
+        "transferencias_hoje": 0,
+        "bloqueios_hoje": 0
+    }
+
+    grafico_semana = {
+        "Seg": {"entrada": 0, "saida": 0},
+        "Ter": {"entrada": 0, "saida": 0},
+        "Qua": {"entrada": 0, "saida": 0},
+        "Qui": {"entrada": 0, "saida": 0},
+        "Sex": {"entrada": 0, "saida": 0}
+    }
+
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT codigo, descricao, quantidade, unidade, localizacao, status
+            FROM materiais
+            WHERE empresa_id = %s
+            ORDER BY codigo
+        """, (empresa_id,))
+        materiais_lista = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT
+                SUM(CASE WHEN tipo = 'Entrada' THEN 1 ELSE 0 END) AS entradas_hoje,
+                SUM(CASE WHEN tipo = 'Saída' THEN 1 ELSE 0 END) AS saidas_hoje,
+                SUM(CASE WHEN tipo = 'Transferência' THEN 1 ELSE 0 END) AS transferencias_hoje,
+                SUM(CASE WHEN tipo = 'Bloqueio de material' THEN 1 ELSE 0 END) AS bloqueios_hoje
+            FROM movimentacoes
+            WHERE empresa_id = %s
+            AND data >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        """, (empresa_id,))
+        resumo_db = cursor.fetchone() or {}
+        resumo = {
+            "entradas_hoje": resumo_db.get("entradas_hoje") or 0,
+            "saidas_hoje": resumo_db.get("saidas_hoje") or 0,
+            "transferencias_hoje": resumo_db.get("transferencias_hoje") or 0,
+            "bloqueios_hoje": resumo_db.get("bloqueios_hoje") or 0
+        }
+
+        cursor.execute("""
+            SELECT
+                DAYOFWEEK(data) AS dia_semana,
+                tipo,
+                COUNT(*) AS total
+            FROM movimentacoes
+            WHERE empresa_id = %s
+              AND data >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+              AND tipo IN ('Entrada', 'Saída')
+            GROUP BY dia_semana, tipo
+        """, (empresa_id,))
+
+        mapa_dias = {2: "Seg", 3: "Ter", 4: "Qua", 5: "Qui", 6: "Sex"}
+
+        for item in cursor.fetchall():
+            dia = mapa_dias.get(item["dia_semana"])
+            if dia:
+                if item["tipo"] == "Entrada":
+                    grafico_semana[dia]["entrada"] = item["total"]
+                elif item["tipo"] == "Saída":
+                    grafico_semana[dia]["saida"] = item["total"]
+
+        sql = """
+            SELECT m.tipo, m.material_codigo, mat.descricao AS material_descricao,
+                   m.origem, m.destino, m.quantidade, m.validacao, m.data,
+                   m.responsavel, m.observacao, m.criado_em
+            FROM movimentacoes m
+            LEFT JOIN materiais mat
+              ON mat.empresa_id = m.empresa_id
+             AND mat.codigo = m.material_codigo
+            WHERE m.empresa_id = %s
+        """
+        params = [empresa_id]
+
+        if filtros["busca"]:
+            sql += """
+                AND (
+                    m.material_codigo LIKE %s
+                    OR mat.descricao LIKE %s
+                    OR m.responsavel LIKE %s
+                    OR m.origem LIKE %s
+                    OR m.destino LIKE %s
+                )
+            """
+            termo = f"%{filtros['busca']}%"
+            params.extend([termo, termo, termo, termo, termo])
+
+        if filtros["tipo"]:
+            sql += " AND m.tipo = %s"
+            params.append(filtros["tipo"])
+
+        if filtros["data_inicio"]:
+            sql += " AND m.data >= %s"
+            params.append(filtros["data_inicio"])
+
+        if filtros["data_fim"]:
+            sql += " AND m.data <= %s"
+            params.append(filtros["data_fim"])
+
+        sql += " ORDER BY m.criado_em DESC LIMIT 100"
+
+        cursor.execute(sql, params)
+        lista = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    altura_grafico = {}
+    for dia, valores in grafico_semana.items():
+        altura_grafico[dia] = {
+            "entrada": max(valores["entrada"] * 20, 6),
+            "saida": max(valores["saida"] * 20, 6)
+        }
+
+    return render_template(
+        "movimentacoes.html",
+        movimentacoes=lista,
+        materiais=materiais_lista,
+        filtros=filtros,
+        resumo=resumo,
+        altura_grafico=altura_grafico
+    )
 
 
 @app.route("/etiquetas", methods=["GET", "POST"])
