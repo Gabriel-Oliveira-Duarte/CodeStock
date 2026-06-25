@@ -172,9 +172,19 @@
                     </td>
                     <td>
                       <div class="row-actions">
-                        <button class="icon-btn" title="Visualizar">⌕</button>
-                        <button class="icon-btn" title="Editar">✎</button>
-                        <button class="icon-btn" title="Etiqueta">▦</button>
+                        <a class="icon-btn" href="{{ url_for('visualizar_material', codigo=material.codigo) }}" title="Visualizar">⌕</a>
+
+                        {% if session.get("usuario_perfil") in ["admin", "operador"] %}
+                          <a class="icon-btn" href="{{ url_for('editar_material', codigo=material.codigo) }}" title="Editar">✎</a>
+                        {% endif %}
+
+                        <a class="icon-btn" href="{{ url_for('gerar_qrcode_material', codigo=material.codigo) }}" target="_blank" title="QR Code">▦</a>
+
+                        {% if session.get("usuario_perfil") == "admin" %}
+                          <form action="{{ url_for('excluir_material', codigo=material.codigo) }}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir este material? Essa ação também remove etiquetas geradas para ele.');">
+                            <button class="icon-btn icon-danger" type="submit" title="Excluir">🗑</button>
+                          </form>
+                        {% endif %}
                       </div>
                     </td>
                   </tr>

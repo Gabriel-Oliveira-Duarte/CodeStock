@@ -571,3 +571,45 @@
         width: 100%;
       }
     }
+
+    .preview-label,
+    .preview-info {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 18px;
+      padding: 15px;
+      margin-top: 12px;
+    }
+
+    .preview-label strong,
+    .preview-info strong {
+      display: block;
+      color: white;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .preview-label span,
+    .preview-info span {
+      display: block;
+      color: #dceaff;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .preview-label small {
+      color: #dceaff;
+      font-weight: 700;
+    }
+
+    .material-preview .btn-secondary {
+      position: relative;
+      z-index: 1;
+      margin-top: 16px;
+      background: rgba(255, 255, 255, 0.14);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.28);
+    }

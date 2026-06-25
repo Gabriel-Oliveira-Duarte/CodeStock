@@ -2,40 +2,198 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>CodeStock | Material</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Detalhes do Material</title>
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/materiais.css') }}">
 </head>
 
 <body>
-  <div class="main">
-    <section class="panel">
-      <div class="panel-header">
+  <div class="layout">
+    {% include "sidebar.html" %}
+
+    <main class="main">
+      <section class="topbar">
         <div>
           <h1>{{ material.codigo }}</h1>
           <p>{{ material.descricao }}</p>
         </div>
-      </div>
 
-      <p><strong>Lote:</strong> {{ material.lote }}</p>
-      <p><strong>Fornecedor:</strong> {{ material.fornecedor }}</p>
-      <p><strong>Quantidade:</strong> {{ material.quantidade }} {{ material.unidade }}</p>
-      <p><strong>Localização:</strong> {{ material.localizacao }}</p>
-      <p><strong>Status:</strong> {{ material.status }}</p>
-      <p><strong>Responsável:</strong> {{ material.responsavel }}</p>
-      <p><strong>Observação:</strong> {{ material.observacao or "Sem observação" }}</p>
+        <div class="topbar-actions">
+          <a href="{{ url_for('materiais') }}" class="btn-secondary">Voltar</a>
 
-      <br>
+          {% if session.get("usuario_perfil") in ["admin", "operador"] %}
+            <a href="{{ url_for('editar_material', codigo=material.codigo) }}" class="btn-primary">Editar material</a>
+          {% endif %}
+        </div>
+      </section>
 
-      <img 
-        src="{{ url_for('gerar_qrcode_material', codigo=material.codigo) }}" 
-        alt="QR Code do material"
-        style="width: 180px;"
-      >
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+          <div class="flash-area">
+            {% for categoria, mensagem in mensagens %}
+              <div class="flash {{ categoria }}">{{ mensagem }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
 
-      <br><br>
+      <section class="details-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Informações do material</h2>
+              <p>Dados principais utilizados para rastreabilidade, conferência e movimentação.</p>
+            </div>
 
-      <a href="{{ url_for('materiais') }}" class="btn-secondary">Voltar</a>
-    </section>
+            {% if material.status == 'Liberado' %}
+              <span class="tag ok">Liberado</span>
+            {% elif material.status == 'Pendente' %}
+              <span class="tag alert">Pendente</span>
+            {% elif material.status == 'Conferência' %}
+              <span class="tag info">Conferência</span>
+            {% else %}
+              <span class="tag gray">{{ material.status }}</span>
+            {% endif %}
+          </div>
+
+          <div class="details-list">
+            <div class="detail-item">
+              <span>Código</span>
+              <strong>{{ material.codigo }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Descrição</span>
+              <strong>{{ material.descricao }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Lote</span>
+              <strong>{{ material.lote or '-' }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Fornecedor</span>
+              <strong>{{ material.fornecedor or '-' }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Quantidade</span>
+              <strong>{{ material.quantidade }} {{ material.unidade }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Localização</span>
+              <strong>{{ material.localizacao or '-' }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Data de entrada</span>
+              <strong>
+                {% if material.data_entrada %}
+                  {{ material.data_entrada.strftime('%d/%m/%Y') }}
+                {% else %}
+                  -
+                {% endif %}
+              </strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Responsável</span>
+              <strong>{{ material.responsavel or '-' }}</strong>
+            </div>
+          </div>
+
+          <div class="observation-box">
+            <span>Observação</span>
+            <p>{{ material.observacao or "Sem observação cadastrada." }}</p>
+          </div>
+        </div>
+
+        <aside class="panel qr-panel">
+          <div class="panel-header">
+            <div>
+              <h2>QR Code</h2>
+              <p>Use a etiqueta para acessar rapidamente os detalhes deste material.</p>
+            </div>
+          </div>
+
+          <img
+            class="qr-image"
+            src="{{ url_for('gerar_qrcode_material', codigo=material.codigo) }}"
+            alt="QR Code do material"
+          >
+
+          <a href="{{ url_for('gerar_qrcode_material', codigo=material.codigo) }}" target="_blank" class="btn-primary">Abrir QR Code</a>
+
+          {% if session.get("usuario_perfil") == "admin" %}
+            <form action="{{ url_for('excluir_material', codigo=material.codigo) }}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir este material? Essa ação também remove etiquetas geradas para ele.');">
+              <button class="btn-danger-full" type="submit">Excluir material</button>
+            </form>
+          {% endif %}
+        </aside>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Histórico de movimentações</h2>
+            <p>Últimas movimentações vinculadas a este material.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Origem</th>
+                <th>Destino</th>
+                <th>Quantidade</th>
+                <th>Data</th>
+                <th>Responsável</th>
+                <th>Validação</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% if historico %}
+                {% for mov in historico %}
+                  <tr>
+                    <td>{{ mov.tipo }}</td>
+                    <td>{{ mov.origem or '-' }}</td>
+                    <td>{{ mov.destino or '-' }}</td>
+                    <td>{{ mov.quantidade }}</td>
+                    <td>
+                      {% if mov.data %}
+                        {{ mov.data.strftime('%d/%m/%Y') }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>{{ mov.responsavel or '-' }}</td>
+                    <td>
+                      {% if mov.validacao == 'Validado' %}
+                        <span class="tag ok">Validado</span>
+                      {% elif mov.validacao == 'Revisão necessária' %}
+                        <span class="tag alert">Revisão</span>
+                      {% else %}
+                        <span class="tag info">Pendente</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="7">Nenhuma movimentação registrada para este material.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
   </div>
 </body>
 </html>

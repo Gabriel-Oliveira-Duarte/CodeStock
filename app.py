@@ -402,8 +402,8 @@ def materiais():
         empresa_id = session["empresa_id"]
         try:
             cursor.execute("""
-                SELECT codigo, descricao, lote, fornecedor, quantidade, unidade,
-                       localizacao, data_entrada, status
+                SELECT id, codigo, descricao, lote, fornecedor, quantidade, unidade,
+                       localizacao, data_entrada, status, responsavel, observacao, criado_em
                 FROM materiais
                 WHERE empresa_id = %s
                 ORDER BY criado_em DESC
@@ -414,6 +414,197 @@ def materiais():
             conn.close()
 
     return render_template("materiais.html", materiais=lista)
+
+
+@app.route("/material/editar/<codigo>", methods=["GET", "POST"])
+@login_required
+@perfil_required("admin", "operador")
+def editar_material(codigo):
+    conn = conectar_db()
+
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return redirect(url_for("materiais"))
+
+    empresa_id = session["empresa_id"]
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT *
+            FROM materiais
+            WHERE empresa_id = %s AND codigo = %s
+        """, (empresa_id, codigo))
+        material = cursor.fetchone()
+
+        if not material:
+            flash("Material não encontrado.", "erro")
+            return redirect(url_for("materiais"))
+
+        if request.method == "GET":
+            return render_template("material_editar.html", material=material)
+
+        novo_codigo = request.form.get("codigo", "").strip()
+        descricao = request.form.get("descricao", "").strip()
+        lote = request.form.get("lote", "").strip()
+        fornecedor = request.form.get("fornecedor", "").strip()
+        quantidade = request.form.get("quantidade", "0").strip()
+        unidade = request.form.get("unidade", "").strip()
+        localizacao = request.form.get("localizacao", "").strip()
+        status = request.form.get("status", "Pendente").strip()
+        data_entrada = request.form.get("dataEntrada", "").strip() or None
+        responsavel = request.form.get("responsavel", "").strip()
+        observacao = request.form.get("observacao", "").strip()
+
+        status_validos = ["Liberado", "Pendente", "Conferência", "Bloqueado"]
+
+        if not novo_codigo or not descricao or not lote or not fornecedor or not quantidade or not unidade or not localizacao:
+            flash("Preencha todos os campos obrigatórios.", "erro")
+            return render_template("material_editar.html", material=material)
+
+        if status not in status_validos:
+            flash("Status inválido.", "erro")
+            return render_template("material_editar.html", material=material)
+
+        try:
+            quantidade_float = float(quantidade)
+        except ValueError:
+            flash("Quantidade inválida.", "erro")
+            return render_template("material_editar.html", material=material)
+
+        cursor.execute("""
+            UPDATE materiais
+            SET codigo = %s,
+                descricao = %s,
+                lote = %s,
+                fornecedor = %s,
+                quantidade = %s,
+                unidade = %s,
+                localizacao = %s,
+                status = %s,
+                data_entrada = %s,
+                responsavel = %s,
+                observacao = %s
+            WHERE empresa_id = %s AND codigo = %s
+        """, (
+            novo_codigo,
+            descricao,
+            lote,
+            fornecedor,
+            quantidade_float,
+            unidade,
+            localizacao,
+            status,
+            data_entrada,
+            responsavel,
+            observacao,
+            empresa_id,
+            codigo
+        ))
+
+        if novo_codigo != codigo:
+            cursor.execute("""
+                UPDATE movimentacoes
+                SET material_codigo = %s
+                WHERE empresa_id = %s AND material_codigo = %s
+            """, (novo_codigo, empresa_id, codigo))
+
+            cursor.execute("""
+                UPDATE etiquetas
+                SET material_codigo = %s,
+                    lote = %s,
+                    descricao = %s,
+                    quantidade = %s,
+                    localizacao = %s
+                WHERE empresa_id = %s AND material_codigo = %s
+            """, (
+                novo_codigo,
+                lote,
+                descricao,
+                f"{quantidade_float:g} {unidade}",
+                localizacao,
+                empresa_id,
+                codigo
+            ))
+        else:
+            cursor.execute("""
+                UPDATE etiquetas
+                SET lote = %s,
+                    descricao = %s,
+                    quantidade = %s,
+                    localizacao = %s
+                WHERE empresa_id = %s AND material_codigo = %s
+            """, (
+                lote,
+                descricao,
+                f"{quantidade_float:g} {unidade}",
+                localizacao,
+                empresa_id,
+                codigo
+            ))
+
+        conn.commit()
+        flash("Material atualizado com sucesso!", "sucesso")
+        return redirect(url_for("materiais"))
+
+    except mysql.connector.IntegrityError:
+        conn.rollback()
+        flash("Já existe outro material com esse código nesta empresa.", "erro")
+        return redirect(url_for("materiais"))
+    except Exception as e:
+        conn.rollback()
+        flash(f"Erro ao editar material: {e}", "erro")
+        return redirect(url_for("materiais"))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/material/excluir/<codigo>", methods=["POST"])
+@login_required
+@perfil_required("admin")
+def excluir_material(codigo):
+    conn = conectar_db()
+
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return redirect(url_for("materiais"))
+
+    empresa_id = session["empresa_id"]
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT id
+            FROM materiais
+            WHERE empresa_id = %s AND codigo = %s
+        """, (empresa_id, codigo))
+
+        if not cursor.fetchone():
+            flash("Material não encontrado.", "erro")
+            return redirect(url_for("materiais"))
+
+        cursor.execute("""
+            DELETE FROM etiquetas
+            WHERE empresa_id = %s AND material_codigo = %s
+        """, (empresa_id, codigo))
+
+        cursor.execute("""
+            DELETE FROM materiais
+            WHERE empresa_id = %s AND codigo = %s
+        """, (empresa_id, codigo))
+
+        conn.commit()
+        flash("Material excluído com sucesso!", "sucesso")
+
+    except Exception as e:
+        conn.rollback()
+        flash(f"Erro ao excluir material: {e}", "erro")
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("materiais"))
 
 
 @app.route("/materialcadastro", methods=["GET", "POST"])
@@ -931,7 +1122,21 @@ def visualizar_material(codigo):
             flash("Material não encontrado.", "erro")
             return redirect(url_for("materiais"))
 
-        return render_template("material_detalhes.html", material=material)
+        cursor.execute("""
+            SELECT tipo, origem, destino, quantidade, data, responsavel, validacao, observacao, criado_em
+            FROM movimentacoes
+            WHERE empresa_id = %s AND material_codigo = %s
+            ORDER BY criado_em DESC
+            LIMIT 20
+        """, (session["empresa_id"], codigo))
+
+        historico = cursor.fetchall()
+
+        return render_template(
+            "material_detalhes.html",
+            material=material,
+            historico=historico
+        )
 
     finally:
         cursor.close()
