@@ -1,58 +1,199 @@
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
+.flash-area {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.flash {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.flash.erro {
+  color: #7f1d1d;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.flash.sucesso {
+  color: #14532d;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.scanner-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.scanner-panel,
+.manual-panel {
+  min-height: 100%;
+}
+
+.reader-shell {
+  position: relative;
   background: #07182c;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.scanner-card {
-  width: 100%;
-  max-width: 430px;
-  background: #ffffff;
-  color: #07182c;
-  border-radius: 22px;
-  padding: 24px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-  text-align: center;
-}
-
-.scanner-card h1 {
-  margin: 0 0 10px;
-  font-size: 26px;
-}
-
-.scanner-card p {
-  margin: 0 0 20px;
-  color: #64748b;
-  font-size: 15px;
+  border-radius: 24px;
+  padding: 18px;
+  border: 1px solid var(--borda);
+  overflow: hidden;
 }
 
 #reader {
   width: 100%;
+  min-height: 360px;
+  border-radius: 18px;
   overflow: hidden;
-  border-radius: 16px;
-  border: 2px solid #dbeafe;
-}
-
-.btn-voltar {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 12px 18px;
-  border-radius: 12px;
   background: #07182c;
-  color: white;
-  text-decoration: none;
-  font-weight: 700;
 }
 
-.status {
-  margin-top: 14px;
+#reader video {
+  border-radius: 18px;
+}
+
+.scan-frame {
+  pointer-events: none;
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(47, 123, 229, 0.95);
+  border-radius: 24px;
+  box-shadow: 0 0 0 999px rgba(7, 24, 44, 0.18);
+}
+
+.scanner-status {
+  margin-top: 16px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: rgba(47, 123, 229, 0.12);
+  color: var(--azul-principal);
+  font-weight: 900;
   font-size: 14px;
-  color: #2563eb;
-  font-weight: 700;
+}
+
+.scanner-status.success {
+  background: rgba(22, 133, 117, 0.13);
+  color: var(--verde);
+}
+
+.scanner-status.error {
+  background: rgba(242, 90, 75, 0.13);
+  color: var(--vermelho-claro);
+}
+
+.scanner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.manual-form {
+  display: grid;
+  gap: 16px;
+}
+
+.form-group {
+  display: grid;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--azul-marinho);
+}
+
+.form-group input {
+  width: 100%;
+  border: 1px solid var(--borda);
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px;
+  outline: none;
+  color: var(--azul-marinho);
+}
+
+.form-group input:focus {
+  border-color: var(--azul-principal);
+  box-shadow: 0 0 0 3px rgba(47, 123, 229, 0.12);
+}
+
+.full {
+  width: 100%;
+  justify-content: center;
+  border: 0;
+  cursor: pointer;
+}
+
+button.btn-primary,
+button.btn-secondary {
+  border: 0;
+  cursor: pointer;
+}
+
+button.btn-secondary {
+  border: 2px solid var(--borda);
+}
+
+.tips-box {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--branco);
+  border: 1px solid var(--borda);
+}
+
+.tips-box strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.tips-box ul {
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--cinza);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1180px) {
+  .scanner-layout {
+    grid-template-columns: 1fr;
+  }
+
+  #reader {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 720px) {
+  .reader-shell {
+    padding: 12px;
+    border-radius: 20px;
+  }
+
+  #reader {
+    min-height: 280px;
+  }
+
+  .scan-frame {
+    width: 210px;
+    height: 210px;
+  }
+
+  .scanner-actions {
+    display: grid;
+  }
 }
