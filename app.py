@@ -1000,10 +1000,21 @@ def etiquetas():
     conn = conectar_db()
     etiquetas_lista = []
     materiais_lista = []
+    resumo_etiquetas = {
+        "total": 0,
+        "ativas": 0,
+        "pendentes": 0,
+        "reimpressoes": 0
+    }
 
     if not conn:
         flash("Erro ao conectar ao banco de dados.", "erro")
-        return render_template("etiquetas.html", etiquetas=[], materiais=[])
+        return render_template(
+            "etiquetas.html",
+            etiquetas=[],
+            materiais=[],
+            resumo_etiquetas=resumo_etiquetas
+        )
 
     empresa_id = session["empresa_id"]
 
@@ -1015,8 +1026,31 @@ def etiquetas():
         localizacao = request.form.get("localizacao", "").strip()
         status = request.form.get("statusEtiqueta", "Gerada").strip()
 
-        cursor = conn.cursor()
+        status_validos = ["Ativa", "Gerada", "Pendente", "Reimpressão"]
+
+        if not codigo or not descricao or not quantidade or not localizacao:
+            flash("Selecione um material e confirme os dados da etiqueta.", "erro")
+            conn.close()
+            return redirect(url_for("etiquetas"))
+
+        if status not in status_validos:
+            flash("Status da etiqueta inválido.", "erro")
+            conn.close()
+            return redirect(url_for("etiquetas"))
+
+        cursor = conn.cursor(dictionary=True)
         try:
+            cursor.execute("""
+                SELECT codigo
+                FROM materiais
+                WHERE empresa_id = %s AND codigo = %s
+            """, (empresa_id, codigo))
+            material = cursor.fetchone()
+
+            if not material:
+                flash("Material não encontrado para gerar etiqueta.", "erro")
+                return redirect(url_for("etiquetas"))
+
             cursor.execute("""
                 INSERT INTO etiquetas
                     (empresa_id, material_codigo, lote, descricao, quantidade, localizacao, status)
@@ -1025,10 +1059,11 @@ def etiquetas():
             """, (empresa_id, codigo, lote, descricao, quantidade, localizacao, status))
 
             conn.commit()
-            flash("Etiqueta gerada com sucesso!", "sucesso")
+            flash("Etiqueta gerada com sucesso! Ela já está pronta para impressão ou PDF.", "sucesso")
             return redirect(url_for("etiquetas"))
 
         except Exception as e:
+            conn.rollback()
             flash(f"Erro ao gerar etiqueta: {e}", "erro")
         finally:
             cursor.close()
@@ -1044,12 +1079,33 @@ def etiquetas():
         materiais_lista = cursor.fetchall()
 
         cursor.execute("""
-            SELECT material_codigo, descricao, lote, quantidade, localizacao, status, criado_em
-            FROM etiquetas
-            WHERE empresa_id = %s
-            ORDER BY criado_em DESC
+            SELECT e.material_codigo, e.descricao, e.lote, e.quantidade,
+                   e.localizacao, e.status, e.criado_em, m.unidade
+            FROM etiquetas e
+            LEFT JOIN materiais m
+              ON m.empresa_id = e.empresa_id
+             AND m.codigo = e.material_codigo
+            WHERE e.empresa_id = %s
+            ORDER BY e.criado_em DESC
         """, (empresa_id,))
         etiquetas_lista = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = 'Ativa' THEN 1 ELSE 0 END) AS ativas,
+                SUM(CASE WHEN status = 'Pendente' THEN 1 ELSE 0 END) AS pendentes,
+                SUM(CASE WHEN status = 'Reimpressão' THEN 1 ELSE 0 END) AS reimpressoes
+            FROM etiquetas
+            WHERE empresa_id = %s
+        """, (empresa_id,))
+        resumo_db = cursor.fetchone() or {}
+        resumo_etiquetas = {
+            "total": resumo_db.get("total") or 0,
+            "ativas": resumo_db.get("ativas") or 0,
+            "pendentes": resumo_db.get("pendentes") or 0,
+            "reimpressoes": resumo_db.get("reimpressoes") or 0
+        }
 
     finally:
         cursor.close()
@@ -1058,7 +1114,130 @@ def etiquetas():
     return render_template(
         "etiquetas.html",
         etiquetas=etiquetas_lista,
-        materiais=materiais_lista
+        materiais=materiais_lista,
+        resumo_etiquetas=resumo_etiquetas
+    )
+
+
+@app.route("/etiquetas/pdf/<codigo>")
+@login_required
+@perfil_required("admin", "operador")
+def baixar_etiqueta_pdf(codigo):
+    conn = conectar_db()
+
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return redirect(url_for("etiquetas"))
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT m.codigo, m.descricao, m.lote, m.quantidade, m.unidade,
+                   m.localizacao, m.status, e.criado_em AS etiqueta_criada_em,
+                   e.status AS status_etiqueta
+            FROM materiais m
+            LEFT JOIN etiquetas e
+              ON e.empresa_id = m.empresa_id
+             AND e.material_codigo = m.codigo
+            WHERE m.empresa_id = %s AND m.codigo = %s
+            ORDER BY e.criado_em DESC
+            LIMIT 1
+        """, (session["empresa_id"], codigo))
+        material = cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
+
+    if not material:
+        flash("Material não encontrado para gerar PDF da etiqueta.", "erro")
+        return redirect(url_for("etiquetas"))
+
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.units import mm
+        from reportlab.lib.utils import ImageReader
+        from reportlab.pdfgen import canvas
+    except Exception:
+        flash("Dependência reportlab não instalada. Rode: pip install reportlab", "erro")
+        return redirect(url_for("etiquetas"))
+
+    buffer_pdf = BytesIO()
+    pdf = canvas.Canvas(buffer_pdf, pagesize=A4)
+    largura, altura = A4
+
+    etiqueta_largura = 100 * mm
+    etiqueta_altura = 70 * mm
+    x = 18 * mm
+    y = altura - etiqueta_altura - 18 * mm
+
+    pdf.setStrokeColor(colors.HexColor("#07182c"))
+    pdf.setLineWidth(1.4)
+    pdf.roundRect(x, y, etiqueta_largura, etiqueta_altura, 4 * mm, stroke=1, fill=0)
+
+    pdf.setFillColor(colors.HexColor("#07182c"))
+    pdf.rect(x, y + etiqueta_altura - 13 * mm, etiqueta_largura, 13 * mm, stroke=0, fill=1)
+    pdf.setFillColor(colors.white)
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(x + 6 * mm, y + etiqueta_altura - 8.5 * mm, "CODESTOCK")
+    pdf.setFont("Helvetica", 7)
+    pdf.drawRightString(x + etiqueta_largura - 6 * mm, y + etiqueta_altura - 8 * mm, "Etiqueta de identificação")
+
+    qr_url = request.host_url + f"material/{material['codigo']}"
+    qr_img = qrcode.make(qr_url)
+    qr_buffer = BytesIO()
+    qr_img.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
+    qr_reader = ImageReader(qr_buffer)
+
+    qr_size = 34 * mm
+    qr_x = x + etiqueta_largura - qr_size - 7 * mm
+    qr_y = y + 17 * mm
+    pdf.drawImage(qr_reader, qr_x, qr_y, qr_size, qr_size, mask="auto")
+
+    info_x = x + 6 * mm
+    info_y = y + etiqueta_altura - 22 * mm
+    linha = 7 * mm
+
+    quantidade = f"{material.get('quantidade') or 0} {material.get('unidade') or ''}".strip()
+    status = material.get("status_etiqueta") or material.get("status") or "Gerada"
+    data_geracao = material.get("etiqueta_criada_em") or date.today()
+
+    campos = [
+        ("Código", material.get("codigo") or "-"),
+        ("Material", material.get("descricao") or "-"),
+        ("Lote", material.get("lote") or "-"),
+        ("Quantidade", quantidade or "-"),
+        ("Local", material.get("localizacao") or "-"),
+        ("Status", status),
+    ]
+
+    pdf.setFillColor(colors.HexColor("#07182c"))
+    for rotulo, valor in campos:
+        pdf.setFont("Helvetica-Bold", 7)
+        pdf.drawString(info_x, info_y, f"{rotulo}:")
+        pdf.setFont("Helvetica", 8)
+        texto = str(valor)
+        if len(texto) > 34:
+            texto = texto[:31] + "..."
+        pdf.drawString(info_x + 22 * mm, info_y, texto)
+        info_y -= linha
+
+    pdf.setFont("Helvetica", 6.5)
+    pdf.setFillColor(colors.HexColor("#5f6b7c"))
+    pdf.drawString(x + 6 * mm, y + 7 * mm, f"Gerado em: {data_geracao}")
+    pdf.drawRightString(x + etiqueta_largura - 6 * mm, y + 7 * mm, "Escaneie para abrir a ficha do material")
+
+    pdf.showPage()
+    pdf.save()
+    buffer_pdf.seek(0)
+
+    nome_arquivo = f"etiqueta_{material['codigo']}.pdf"
+    return send_file(
+        buffer_pdf,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=nome_arquivo
     )
 
 

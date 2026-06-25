@@ -16,7 +16,7 @@
       <section class="topbar">
         <div>
           <h1>Etiquetas QR Code</h1>
-          <p>Gere, visualize e imprima etiquetas padronizadas para rastreabilidade de matéria-prima.</p>
+          <p>Gere, visualize, imprima e baixe etiquetas industriais para identificação de matéria-prima.</p>
         </div>
 
         <span class="status">Identificação ativa</span>
@@ -38,7 +38,7 @@
             <div class="metric-icon blue">▦</div>
             <span>Etiquetas</span>
           </div>
-          <strong>{{ etiquetas|length }}</strong>
+          <strong>{{ resumo_etiquetas.total }}</strong>
           <small>QR Codes gerados</small>
         </div>
 
@@ -47,7 +47,7 @@
             <div class="metric-icon green">✓</div>
             <span>Ativas</span>
           </div>
-          <strong>{{ etiquetas|selectattr('status', 'equalto', 'Ativa')|list|length }}</strong>
+          <strong>{{ resumo_etiquetas.ativas }}</strong>
           <small>em uso no estoque</small>
         </div>
 
@@ -56,7 +56,7 @@
             <div class="metric-icon red">!</div>
             <span>Pendentes</span>
           </div>
-          <strong>{{ etiquetas|selectattr('status', 'equalto', 'Pendente')|list|length }}</strong>
+          <strong>{{ resumo_etiquetas.pendentes }}</strong>
           <small>aguardando impressão</small>
         </div>
 
@@ -65,34 +65,36 @@
             <div class="metric-icon gray">↻</div>
             <span>Reimpressões</span>
           </div>
-          <strong>{{ etiquetas|selectattr('status', 'equalto', 'Reimpressão')|list|length }}</strong>
+          <strong>{{ resumo_etiquetas.reimpressoes }}</strong>
           <small>solicitadas</small>
         </div>
       </section>
 
-      <section class="content-grid">
+      <section class="content-grid etiquetas-grid">
         <div>
           <section class="panel">
             <div class="panel-header">
               <div>
                 <h2>Gerar nova etiqueta</h2>
-                <p>Selecione um material cadastrado para criar uma etiqueta com QR Code e identificação padronizada.</p>
+                <p>Escolha um material cadastrado. Os dados serão preenchidos automaticamente para reduzir erros.</p>
               </div>
+              <span class="tag info">QR inteligente</span>
             </div>
 
-            <form action="{{ url_for('etiquetas') }}" method="post">
+            <form action="{{ url_for('etiquetas') }}" method="post" id="etiquetaForm">
               <div class="form-grid">
-                <div class="form-group">
-                  <label for="codigo">Código do material</label>
+                <div class="form-group full-field">
+                  <label for="codigo">Material</label>
                   <select id="codigo" name="codigo" required onchange="preencherMaterial()">
                     <option value="">Selecione um material</option>
                     {% for material in materiais %}
                       <option
                         value="{{ material.codigo }}"
-                        data-descricao="{{ material.descricao }}"
-                        data-lote="{{ material.lote }}"
-                        data-qtd="{{ material.quantidade }} {{ material.unidade }}"
-                        data-local="{{ material.localizacao }}"
+                        data-descricao="{{ material.descricao|e }}"
+                        data-lote="{{ material.lote or ''|e }}"
+                        data-qtd="{{ material.quantidade }} {{ material.unidade or '' }}"
+                        data-local="{{ material.localizacao or ''|e }}"
+                        data-status="{{ material.status or 'Gerada' }}"
                       >
                         {{ material.codigo }} - {{ material.descricao }}
                       </option>
@@ -102,7 +104,7 @@
 
                 <div class="form-group">
                   <label for="lote">Lote</label>
-                  <input id="lote" name="lote" type="text" placeholder="Ex: L2408" oninput="atualizarPreview()" required>
+                  <input id="lote" name="lote" type="text" placeholder="Ex: L2408" oninput="atualizarPreview()">
                 </div>
 
                 <div class="form-group">
@@ -121,7 +123,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="statusEtiqueta">Status</label>
+                  <label for="statusEtiqueta">Status da etiqueta</label>
                   <select id="statusEtiqueta" name="statusEtiqueta" onchange="atualizarPreview()">
                     <option>Ativa</option>
                     <option>Gerada</option>
@@ -132,13 +134,14 @@
               </div>
 
               <div class="form-actions">
-                <button class="btn-primary" type="submit">Gerar etiqueta</button>
-                <button class="btn-secondary" type="button" onclick="imprimirEtiqueta()">Imprimir etiqueta</button>
+                <button class="btn-primary" type="submit">🏷️ Gerar etiqueta</button>
+                <button class="btn-secondary" type="button" onclick="imprimirEtiqueta()">🖨️ Imprimir prévia</button>
+                <a class="btn-secondary disabled-link" id="pdfPreviewLink" href="#">📄 Baixar PDF</a>
                 <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
               </div>
 
               <div class="success-message" id="successMessage">
-                Etiqueta gerada com sucesso. O QR Code já está pronto para impressão.
+                Etiqueta preparada. O QR Code direciona para a ficha completa do material.
               </div>
             </form>
           </section>
@@ -147,7 +150,7 @@
             <div class="panel-header">
               <div>
                 <h2>Etiquetas geradas</h2>
-                <p>Lista de identificações criadas para os materiais cadastrados.</p>
+                <p>Histórico de identificações criadas para impressão, PDF ou reimpressão.</p>
               </div>
             </div>
 
@@ -173,7 +176,7 @@
                     <th>Localização</th>
                     <th>Status</th>
                     <th>QR Code</th>
-                    <th>Ação</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
 
@@ -183,8 +186,8 @@
                       <tr>
                         <td><strong>{{ etiqueta.material_codigo }}</strong></td>
                         <td>{{ etiqueta.descricao }}</td>
-                        <td>{{ etiqueta.lote }}</td>
-                        <td>{{ etiqueta.localizacao }}</td>
+                        <td>{{ etiqueta.lote or '-' }}</td>
+                        <td>{{ etiqueta.localizacao or '-' }}</td>
                         <td>
                           {% if etiqueta.status == 'Ativa' %}
                             <span class="tag ok">Ativa</span>
@@ -206,19 +209,22 @@
                           >
                         </td>
                         <td>
-                          <button 
-                          class="action-btn" 
-                          type="button"
-                          onclick="imprimirEtiquetaTabela(
-                            '{{ etiqueta.material_codigo }}',
-                            '{{ etiqueta.descricao }}',
-                            '{{ etiqueta.lote }}',
-                            '{{ etiqueta.quantidade }}',
-                            '{{ etiqueta.localizacao }}',
-                            '{{ etiqueta.status }}'
-                          )">
-                          Imprimir
-                        </button>
+                          <div class="table-actions">
+                            <button
+                              class="action-btn print-label-btn"
+                              type="button"
+                              data-codigo="{{ etiqueta.material_codigo|e }}"
+                              data-descricao="{{ etiqueta.descricao|e }}"
+                              data-lote="{{ etiqueta.lote or ''|e }}"
+                              data-quantidade="{{ etiqueta.quantidade or ''|e }}"
+                              data-localizacao="{{ etiqueta.localizacao or ''|e }}"
+                              data-status="{{ etiqueta.status or 'Gerada'|e }}"
+                            >
+                              Imprimir
+                            </button>
+                            <a class="action-btn" href="{{ url_for('baixar_etiqueta_pdf', codigo=etiqueta.material_codigo) }}">PDF</a>
+                            <a class="action-btn" href="{{ url_for('visualizar_material', codigo=etiqueta.material_codigo) }}">Ficha</a>
+                          </div>
                         </td>
                       </tr>
                     {% endfor %}
@@ -237,55 +243,70 @@
           <div class="panel-header">
             <div>
               <h2>Prévia da etiqueta</h2>
-              <p>Modelo visual para impressão e fixação no material.</p>
+              <p>Modelo industrial para impressão e fixação no material.</p>
             </div>
           </div>
 
-          <div class="label-preview" id="labelPreview">
+          <div class="label-preview industrial-label" id="labelPreview">
             <div class="label-header">
-              <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="CodeStock Logo">
+              <div>
+                <strong>CODESTOCK</strong>
+                <small>Identificação de matéria-prima</small>
+              </div>
               <span id="previewStatus">Ativa</span>
             </div>
 
-            <div class="qr-area">
-              <div class="qr" id="qr"></div>
-            </div>
+            <div class="label-body">
+              <div class="label-info">
+                <h3 id="previewCodigo">MP-0000</h3>
+                <p id="previewDescricao">Descrição do material</p>
 
-            <div class="label-info">
-              <h3 id="previewCodigo">MP-0000</h3>
-              <p id="previewDescricao">Descrição do material</p>
-
-              <div class="label-grid">
-                <div>
-                  <span>Lote</span>
-                  <strong id="previewLote">—</strong>
-                </div>
-                <div>
-                  <span>Qtd.</span>
-                  <strong id="previewQuantidade">—</strong>
-                </div>
-                <div>
-                  <span>Local</span>
-                  <strong id="previewLocal">—</strong>
+                <div class="label-grid">
+                  <div>
+                    <span>Lote</span>
+                    <strong id="previewLote">-</strong>
+                  </div>
+                  <div>
+                    <span>Qtd.</span>
+                    <strong id="previewQuantidade">-</strong>
+                  </div>
+                  <div>
+                    <span>Local</span>
+                    <strong id="previewLocal">-</strong>
+                  </div>
                 </div>
               </div>
+
+              <div class="qr-area">
+                <div class="qr" id="qr"></div>
+              </div>
             </div>
+
+            <div class="label-footer">
+              <span>Gerado em: <strong id="previewData"></strong></span>
+              <span>Escaneie para abrir a ficha</span>
+            </div>
+          </div>
+
+          <div class="preview-actions">
+            <button class="btn-primary" type="button" onclick="imprimirEtiqueta()">🖨️ Imprimir etiqueta</button>
+            <a class="btn-secondary disabled-link" id="pdfPreviewLinkAside" href="#">📄 Baixar PDF</a>
           </div>
 
           <div class="tips">
             <div class="tip-item">
-              <strong>Identificação padronizada</strong>
-              <small>Reduz falhas por etiquetas incompletas ou ilegíveis.</small>
+              <strong>QR inteligente</strong>
+              <small>Ao escanear, o sistema abre a ficha completa do material.</small>
             </div>
 
             <div class="tip-item">
-              <strong>Consulta rápida</strong>
-              <small>O QR Code facilita busca por lote, quantidade, status e localização.</small>
+              <strong>Etiqueta industrial</strong>
+              <small>Layout pensado para impressão, fixação e conferência rápida.</small>
             </div>
 
             <div class="tip-item">
               <strong>Rastreabilidade</strong>
-              <small>Conecta o material físico ao histórico registrado no sistema.</small>
+              <small>Conecta o item físico ao histórico registrado no CodeStock.</small>
             </div>
           </div>
         </aside>
