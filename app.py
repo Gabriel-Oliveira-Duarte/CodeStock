@@ -2114,15 +2114,17 @@ def visualizar_material(codigo):
             FROM movimentacoes
             WHERE empresa_id = %s AND material_codigo = %s
             ORDER BY criado_em DESC
-            LIMIT 20
+            LIMIT 50
         """, (session["empresa_id"], codigo))
 
         historico = cursor.fetchall()
+        ultima_movimentacao = historico[0] if historico else None
 
         return render_template(
             "material_detalhes.html",
             material=material,
-            historico=historico
+            historico=historico,
+            ultima_movimentacao=ultima_movimentacao
         )
 
     finally:
