@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeStock | Login do Funcionário</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
+</head>
+
+<body>
+  <main class="page">
+    <section class="info-side">
+      <div class="info-content">
+        <div class="brand-row">
+          <a class="logo" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="CodeStock Logo">
+          </a>
+
+          <span class="badge">Acesso direto</span>
+        </div>
+
+        <h1>Entre com sua conta de <span>funcionário</span>.</h1>
+
+        <p>
+          Esta área permite que operadores, conferentes e administradores acessem o CodeStock sem utilizar a senha
+          empresarial. O acesso é validado pelo CNPJ da empresa, perfil, matrícula ou e-mail e senha individual.
+        </p>
+
+        <div class="flow-box">
+          <div class="flow-title">Como funciona o acesso direto</div>
+
+          <div class="flow-steps">
+            <div class="flow-step">
+              <span>01</span>
+              <strong>Empresa</strong>
+              <small>Informe o CNPJ para identificar a empresa vinculada ao funcionário.</small>
+            </div>
+
+            <div class="flow-step">
+              <span>02</span>
+              <strong>Perfil</strong>
+              <small>Selecione o mesmo perfil cadastrado para a conta interna.</small>
+            </div>
+
+            <div class="flow-step">
+              <span>03</span>
+              <strong>Acesso</strong>
+              <small>Use matrícula ou e-mail e a senha individual para entrar no sistema.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <strong>CodeStock</strong> · Sistema de Identificação e Controle de Matéria-Prima
+      </div>
+    </section>
+
+    <section class="login-side">
+      <div class="login-card employee-mode-card">
+        {% include "flash_messages.html" %}
+
+        <div class="step-indicator">
+          <div class="step-pill active">
+            <span>Acesso interno</span>
+            <strong>Login do funcionário</strong>
+          </div>
+        </div>
+
+        <div class="form-screen active">
+          <div class="login-header">
+            <div>
+              <h2>Acesso do funcionário</h2>
+              <p>Informe os dados vinculados à empresa e à sua conta interna.</p>
+            </div>
+
+            <span class="status">Funcionário</span>
+          </div>
+
+          <form action="{{ url_for('login_funcionario') }}" method="post">
+            <div class="form-group">
+              <label for="cnpj">CNPJ da empresa</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <path d="M9 3v18"></path>
+                  <path d="M15 3v18"></path>
+                  <path d="M3 9h18"></path>
+                  <path d="M3 15h18"></path>
+                </svg>
+                <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0001-00" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Perfil de acesso</label>
+
+              <div class="profile-grid">
+                <div class="profile-option">
+                  <input type="radio" id="func_operador" name="perfil" value="operador" checked>
+                  <label for="func_operador">Operador</label>
+                </div>
+
+                <div class="profile-option">
+                  <input type="radio" id="func_conferente" name="perfil" value="conferente">
+                  <label for="func_conferente">Conferente</label>
+                </div>
+
+                <div class="profile-option">
+                  <input type="radio" id="func_admin" name="perfil" value="admin">
+                  <label for="func_admin">Admin</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="usuario">Matrícula ou e-mail</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="usuario" name="usuario" placeholder="Ex: OP001 ou usuario@empresa.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="senhaUsuario">Senha</label>
+              <div class="input-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="senhaUsuario" name="senhaUsuario" placeholder="Digite sua senha" required>
+              </div>
+            </div>
+
+            <div class="form-options">
+              <label class="remember">
+                <input type="checkbox" name="lembrar">
+                Manter conectado
+              </label>
+
+              <a class="text-link" href="#">
+                Esqueci minha senha
+              </a>
+            </div>
+
+            <button class="btn-submit" type="submit">
+              Entrar
+            </button>
+
+            <div class="login-links">
+              <a href="{{ url_for('login') }}">
+                ← Voltar para login da empresa
+              </a>
+            </div>
+          </form>
+
+          <div class="security-note">
+            <strong>Segurança:</strong> o perfil selecionado precisa corresponder exatamente ao perfil cadastrado para o funcionário.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

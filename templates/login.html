@@ -159,10 +159,24 @@
               </div>
             </div>
 
-            <button class="btn-submit" type="submit">Continuar para login interno</button>
-          </form>
+            <button class="btn-submit" type="submit">
+                Continuar para login interno
+            </button>
 
-          <a class="back-home" href="{{ url_for('index') }}">← Voltar para a página inicial</a>
+            <div class="login-links">
+                <a href="{{ url_for('login_funcionario') }}">
+                    Entrar como funcionário
+                </a>
+            </div>
+
+            <hr class="login-divider">
+
+            <div class="login-links">
+                <a href="{{ url_for('index') }}">
+                    ← Voltar para a página inicial
+                </a>
+            </div>
+          </form>
         </div>
 
         <div class="form-screen {% if etapa == 'usuario' %}active{% endif %}" id="usuarioScreen">
@@ -234,11 +248,24 @@
                 Manter conectado
               </label>
 
-              <a href="#">Esqueci minha senha</a>
+              <a class="text-link" href="#">Esqueci minha senha</a>
             </div>
 
-            <button class="btn-submit" type="submit">Entrar no dashboard</button>
-            <button class="btn-secondary-action" type="button" id="voltarEmpresa">Trocar empresa</button>
+            <button class="btn-submit" type="submit">Entrar</button>
+
+            <div class="login-links">
+              <a href="{{ url_for('login_funcionario') }}">
+                Entrar como funcionário
+              </a>
+            </div>
+
+            <hr class="login-divider">
+
+            <div class="login-links">
+              <a href="#" id="voltarEmpresa">
+                ← Trocar empresa
+              </a>
+            </div>
           </form>
 
           <div class="security-note">

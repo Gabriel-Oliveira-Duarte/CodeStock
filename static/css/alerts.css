@@ -1,0 +1,87 @@
+/* Sistema global de mensagens do CodeStock */
+.flash-area {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.flash {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 15px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  box-shadow: 0 10px 24px rgba(7, 24, 44, 0.08);
+}
+
+.flash-icon {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.flash-text {
+  flex: 1;
+}
+
+.flash.sucesso {
+  color: #14532d;
+  background: #dcfce7;
+  border-color: #bbf7d0;
+}
+
+.flash.sucesso .flash-icon {
+  color: #ffffff;
+  background: #168575;
+}
+
+.flash.erro {
+  color: #7f1d1d;
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+.flash.erro .flash-icon {
+  color: #ffffff;
+  background: #d71919;
+}
+
+.flash.aviso {
+  color: #7c2d12;
+  background: #ffedd5;
+  border-color: #fed7aa;
+}
+
+.flash.aviso .flash-icon {
+  color: #ffffff;
+  background: #f97316;
+}
+
+.flash.info {
+  color: #1e3a8a;
+  background: #dbeafe;
+  border-color: #bfdbfe;
+}
+
+.flash.info .flash-icon {
+  color: #ffffff;
+  background: #2f7be5;
+}
+
+@media (max-width: 720px) {
+  .flash {
+    padding: 12px 13px;
+    font-size: 13px;
+  }
+}

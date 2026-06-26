@@ -550,3 +550,104 @@
         align-items: flex-start;
       }
     }
+
+.login-alt-link {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.employee-mode-card .step-indicator {
+  grid-template-columns: 1fr;
+}
+
+.employee-mode-card .step-pill {
+  text-align: center;
+}
+
+.employee-help-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.employee-help-item {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.employee-help-item strong {
+  display: block;
+  color: var(--azul-marinho);
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.employee-help-item small {
+  display: block;
+  color: var(--cinza);
+  line-height: 1.45;
+}
+
+.login-links{
+    display:flex;
+    justify-content:center;
+    margin-top:18px;
+}
+
+.login-links a{
+    color:var(--azul);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    transition:.25s;
+}
+
+.login-links a:hover{
+    color:var(--azul-escuro);
+    text-decoration:underline;
+}
+
+.form-options .text-link{
+    color:var(--azul);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:500;
+}
+
+.form-options .text-link:hover{
+    text-decoration:underline;
+}
+.profile-option label{
+    transition:.25s;
+}
+
+.profile-option input:checked + label{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(59,130,246,.25);
+}
+
+.login-links {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.login-links a {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.login-links a:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.login-divider {
+  margin: 18px 0 12px;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}

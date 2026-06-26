@@ -231,10 +231,20 @@ def login():
             empresa_nome = request.form.get("empresa_nome", "").strip()
             usuario_digitado = request.form.get("usuario", "").strip()
             senha_usuario = request.form.get("senhaUsuario", "")
+            perfil_selecionado = request.form.get("perfil", "").strip()
 
             if not empresa_id:
                 flash("Empresa não identificada. Faça a primeira etapa novamente.", "erro")
                 return render_template("login.html", etapa="empresa")
+
+            if not perfil_selecionado:
+                flash("Selecione o perfil de acesso antes de continuar.", "erro")
+                return render_template(
+                    "login.html",
+                    etapa="usuario",
+                    empresa_id=empresa_id,
+                    empresa_nome=empresa_nome
+                )
 
             cursor.execute("""
                 SELECT *
@@ -263,6 +273,15 @@ def login():
                     empresa_nome=empresa_nome
                 )
 
+            if usuario["perfil"] != perfil_selecionado:
+                flash("O perfil selecionado não corresponde ao usuário informado.", "erro")
+                return render_template(
+                    "login.html",
+                    etapa="usuario",
+                    empresa_id=empresa_id,
+                    empresa_nome=empresa_nome
+                )
+
             if not check_password_hash(usuario["senha_hash"], senha_usuario):
                 flash("Senha do usuário incorreta.", "erro")
                 return render_template(
@@ -278,6 +297,7 @@ def login():
             session["usuario_perfil"] = usuario["perfil"]
             session["empresa_id"] = usuario["empresa_id"]
             session["empresa_nome"] = empresa_nome
+            session["login_origem"] = "empresa"
 
             return redirect(url_for("home"))
 
@@ -291,9 +311,101 @@ def login():
         cursor.close()
         conn.close()
 
+
+@app.route("/login-funcionario", methods=["GET", "POST"])
+def login_funcionario():
+    if request.method == "GET":
+        return render_template("login_funcionario.html")
+
+    cnpj = request.form.get("cnpj", "").strip()
+    perfil_selecionado = request.form.get("perfil", "").strip()
+    usuario_digitado = request.form.get("usuario", "").strip()
+    senha_usuario = request.form.get("senhaUsuario", "")
+
+    if not cnpj or not perfil_selecionado or not usuario_digitado or not senha_usuario:
+        flash("Preencha todos os campos para acessar como funcionário.", "erro")
+        return render_template("login_funcionario.html")
+
+    perfis_validos = ["admin", "operador", "conferente"]
+    if perfil_selecionado not in perfis_validos:
+        flash("Perfil de acesso inválido.", "erro")
+        return render_template("login_funcionario.html")
+
+    conn = conectar_db()
+    if not conn:
+        flash("Erro ao conectar ao banco de dados.", "erro")
+        return render_template("login_funcionario.html")
+
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            "SELECT id, razao_social, nome_fantasia, cnpj FROM empresas WHERE cnpj = %s",
+            (limpar_cnpj(cnpj),)
+        )
+        empresa = cursor.fetchone()
+
+        if not empresa:
+            flash("Empresa não encontrada. Verifique o CNPJ informado.", "erro")
+            return render_template("login_funcionario.html")
+
+        cursor.execute("""
+            SELECT *
+            FROM usuarios
+            WHERE empresa_id = %s
+              AND (
+                matricula = %s
+                OR email = %s
+                OR nome = %s
+              )
+        """, (
+            empresa["id"],
+            usuario_digitado,
+            usuario_digitado.lower(),
+            usuario_digitado
+        ))
+
+        usuario = cursor.fetchone()
+
+        if not usuario:
+            flash("Funcionário não encontrado para esta empresa.", "erro")
+            return render_template("login_funcionario.html")
+
+        if usuario["perfil"] != perfil_selecionado:
+            flash("O perfil selecionado não corresponde ao funcionário informado.", "erro")
+            return render_template("login_funcionario.html")
+
+        if not check_password_hash(usuario["senha_hash"], senha_usuario):
+            flash("Senha do funcionário incorreta.", "erro")
+            return render_template("login_funcionario.html")
+
+        empresa_nome = empresa["nome_fantasia"] or empresa["razao_social"]
+
+        session.clear()
+        session["usuario_id"] = usuario["id"]
+        session["usuario_nome"] = usuario["nome"]
+        session["usuario_perfil"] = usuario["perfil"]
+        session["empresa_id"] = usuario["empresa_id"]
+        session["empresa_nome"] = empresa_nome
+        session["login_origem"] = "funcionario"
+
+        return redirect(url_for("home"))
+
+    except Exception as e:
+        flash(f"Erro no login do funcionário: {e}", "erro")
+        return render_template("login_funcionario.html")
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route("/logout")
 def logout():
+    origem = session.get("login_origem")
     session.clear()
+
+    if origem == "funcionario":
+        return redirect(url_for("login_funcionario"))
+
     return redirect(url_for("index"))
 
 

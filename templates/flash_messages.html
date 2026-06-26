@@ -1,0 +1,18 @@
+{% with mensagens = get_flashed_messages(with_categories=true) %}
+  {% if mensagens %}
+    <div class="flash-area" role="status" aria-live="polite">
+      {% for categoria, mensagem in mensagens %}
+        <div class="flash {{ categoria }}">
+          <span class="flash-icon" aria-hidden="true">
+            {% if categoria == 'sucesso' %}✓
+            {% elif categoria == 'erro' %}×
+            {% elif categoria == 'aviso' %}!
+            {% else %}i
+            {% endif %}
+          </span>
+          <span class="flash-text">{{ mensagem }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

@@ -6,6 +6,7 @@
   <title>CodeStock | Materiais</title>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/materiais.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
 </head>
 
 <body>
@@ -24,15 +25,7 @@
         {% endif %}
       </section>
 
-      {% with mensagens = get_flashed_messages(with_categories=true) %}
-        {% if mensagens %}
-          <div class="flash-area">
-            {% for categoria, mensagem in mensagens %}
-              <div class="flash {{ categoria }}">{{ mensagem }}</div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
+      {% include "flash_messages.html" %}
 
       <section class="metrics">
         <div class="metric-card">
