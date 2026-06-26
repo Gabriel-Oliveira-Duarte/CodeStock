@@ -17,195 +17,376 @@
       <section class="topbar">
         <div>
           <h1>Relatórios</h1>
-          <p>Acompanhe indicadores de estoque, rastreabilidade, etiquetas, pendências e movimentações do CodeStock.</p>
+          <p>Analise estoque, movimentações, pendências e materiais bloqueados com dados reais do CodeStock.</p>
         </div>
-        <span class="status">Dados atualizados</span>
+        <span class="status">Área administrativa</span>
       </section>
 
-      <section class="filters-panel">
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+          <div class="flash-area">
+            {% for categoria, mensagem in mensagens %}
+              <div class="flash {{ categoria }}">{{ mensagem }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form class="filters-panel" method="get" action="{{ url_for('relatorios') }}">
         <div class="filter-group">
-          <label for="periodo">Período</label>
-          <select id="periodo">
-            <option>Últimos 7 dias</option>
-            <option>Últimos 30 dias</option>
-            <option>Últimos 90 dias</option>
-            <option>Este ano</option>
+          <label for="periodo">Período rápido</label>
+          <select id="periodo" name="periodo">
+            <option value="7" {% if filtros.periodo == '7' %}selected{% endif %}>Últimos 7 dias</option>
+            <option value="30" {% if filtros.periodo == '30' %}selected{% endif %}>Últimos 30 dias</option>
+            <option value="90" {% if filtros.periodo == '90' %}selected{% endif %}>Últimos 90 dias</option>
+            <option value="ano" {% if filtros.periodo == 'ano' %}selected{% endif %}>Este ano</option>
+            <option value="todos" {% if filtros.periodo == 'todos' %}selected{% endif %}>Todo o histórico</option>
           </select>
         </div>
 
         <div class="filter-group">
-          <label for="tipo">Tipo de relatório</label>
-          <select id="tipo">
-            <option>Geral do estoque</option>
-            <option>Movimentações</option>
-            <option>Etiquetas QR Code</option>
-            <option>Pendências</option>
+          <label for="tipo_relatorio">Tipo de relatório</label>
+          <select id="tipo_relatorio" name="tipo_relatorio">
+            <option value="geral" {% if filtros.tipo_relatorio == 'geral' %}selected{% endif %}>Geral do estoque</option>
+            <option value="materiais" {% if filtros.tipo_relatorio == 'materiais' %}selected{% endif %}>Materiais</option>
+            <option value="movimentacoes" {% if filtros.tipo_relatorio == 'movimentacoes' %}selected{% endif %}>Movimentações</option>
+            <option value="bloqueados" {% if filtros.tipo_relatorio == 'bloqueados' %}selected{% endif %}>Materiais bloqueados</option>
           </select>
         </div>
 
         <div class="filter-group">
-          <label for="setor">Setor</label>
-          <select id="setor">
-            <option>Todos os setores</option>
-            <option>Recebimento</option>
-            <option>Almoxarifado A3</option>
-            <option>Estoque B1</option>
-            <option>Qualidade</option>
-          </select>
-        </div>
-
-        <button class="btn-primary" type="button" onclick="gerarRelatorio()">Gerar relatório</button>
-      </section>
-
-      <section class="metrics">
-        <div class="metric-card">
-          <div class="metric-top"><div class="metric-icon blue">▣</div><span>Materiais</span></div>
-          <strong>248</strong>
-          <small>itens cadastrados</small>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-top"><div class="metric-icon green">▦</div><span>QR Codes</span></div>
-          <strong>236</strong>
-          <small>etiquetas geradas</small>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-top"><div class="metric-icon red">!</div><span>Pendências</span></div>
-          <strong>12</strong>
-          <small>aguardando conferência</small>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-top"><div class="metric-icon gray">↻</div><span>Movimentações</span></div>
-          <strong>58</strong>
-          <small>registros no mês</small>
-        </div>
-      </section>
-
-      <section class="content-grid">
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Indicador mensal de movimentações</h2>
-              <p>Comparativo fictício de entradas, saídas e transferências registradas.</p>
-            </div>
-            <span class="tag info">Mensal</span>
-          </div>
-
-          <div class="chart large-chart">
-            <div class="bar-group"><div class="bar entrada" style="height:64%;"></div><div class="bar saida" style="height:42%;"></div><div class="bar transferencia" style="height:36%;"></div><small>Jan</small></div>
-            <div class="bar-group"><div class="bar entrada" style="height:76%;"></div><div class="bar saida" style="height:48%;"></div><div class="bar transferencia" style="height:50%;"></div><small>Fev</small></div>
-            <div class="bar-group"><div class="bar entrada" style="height:86%;"></div><div class="bar saida" style="height:60%;"></div><div class="bar transferencia" style="height:44%;"></div><small>Mar</small></div>
-            <div class="bar-group"><div class="bar entrada" style="height:72%;"></div><div class="bar saida" style="height:52%;"></div><div class="bar transferencia" style="height:58%;"></div><small>Abr</small></div>
-            <div class="bar-group"><div class="bar entrada" style="height:90%;"></div><div class="bar saida" style="height:66%;"></div><div class="bar transferencia" style="height:64%;"></div><small>Mai</small></div>
-          </div>
-
-          <div class="legend">
-            <span><i class="entrada-dot"></i> Entradas</span>
-            <span><i class="saida-dot"></i> Saídas</span>
-            <span><i class="transferencia-dot"></i> Transferências</span>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Resumo de eficiência</h2>
-              <p>Indicadores ligados ao objetivo principal do sistema.</p>
-            </div>
-          </div>
-
-          <div class="efficiency-list">
-            <div class="efficiency-item"><div><strong>Rastreabilidade</strong><small>Materiais com QR Code e histórico localizável.</small></div><span>92%</span></div>
-            <div class="progress"><i style="width:92%;"></i></div>
-
-            <div class="efficiency-item"><div><strong>Redução de erros</strong><small>Estimativa após padronização da identificação.</small></div><span>68%</span></div>
-            <div class="progress red-progress"><i style="width:68%;"></i></div>
-
-            <div class="efficiency-item"><div><strong>Organização física</strong><small>Itens com localização definida no estoque.</small></div><span>81%</span></div>
-            <div class="progress green-progress"><i style="width:81%;"></i></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="content-grid bottom-grid">
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Relatórios disponíveis</h2>
-              <p>Modelos de relatórios que podem ser exportados ou impressos.</p>
-            </div>
-          </div>
-
-          <div class="report-list">
-            <div class="report-item"><div class="report-icon blue">01</div><div><strong>Relatório geral de estoque</strong><small>Lista materiais, lotes, quantidades, localização e status.</small></div><button class="small-btn" type="button">Exportar</button></div>
-            <div class="report-item"><div class="report-icon green">02</div><div><strong>Relatório de etiquetas QR Code</strong><small>Mostra etiquetas geradas, pendentes e reimpressões.</small></div><button class="small-btn" type="button">Exportar</button></div>
-            <div class="report-item"><div class="report-icon red">03</div><div><strong>Relatório de pendências</strong><small>Itens aguardando conferência, revisão ou bloqueio.</small></div><button class="small-btn" type="button">Exportar</button></div>
-            <div class="report-item"><div class="report-icon gray">04</div><div><strong>Histórico de movimentações</strong><small>Entradas, saídas, transferências e mudanças de local.</small></div><button class="small-btn" type="button">Exportar</button></div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Últimas ocorrências</h2>
-              <p>Eventos relevantes para análise operacional.</p>
-            </div>
-          </div>
-
-          <div class="timeline">
-            <div class="timeline-item"><strong>MP-2077 com conferência pendente</strong><small>Material recebido, mas ainda não liberado para estoque.</small></div>
-            <div class="timeline-item"><strong>12 etiquetas aguardando impressão</strong><small>Itens cadastrados sem identificação física aplicada.</small></div>
-            <div class="timeline-item"><strong>58 movimentações no mês</strong><small>Inclui entradas, saídas e transferências internas.</small></div>
-            <div class="timeline-item"><strong>MP-4481 em revisão de qualidade</strong><small>Lote bloqueado temporariamente para validação.</small></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>Tabela analítica</h2>
-            <p>Resumo consolidado para apresentação do TCC e análise do sistema.</p>
-          </div>
-          <button class="btn-secondary" type="button" onclick="limparTabela()">Limpar filtro</button>
-        </div>
-
-        <div class="filters-table">
-          <input type="text" id="busca" placeholder="Buscar por indicador, setor ou status..." onkeyup="filtrarTabela()">
-          <select id="statusFiltro" onchange="filtrarTabela()">
+          <label for="status">Status do material</label>
+          <select id="status" name="status">
             <option value="">Todos os status</option>
-            <option>Normal</option>
-            <option>Atenção</option>
-            <option>Crítico</option>
+            {% if dados %}
+              {% for status in dados.opcoes.status %}
+                <option value="{{ status }}" {% if filtros.status == status %}selected{% endif %}>{{ status }}</option>
+              {% endfor %}
+            {% endif %}
           </select>
         </div>
 
-        <div class="table-wrap">
-          <table class="table" id="relatoriosTabela">
-            <thead>
-              <tr>
-                <th>Indicador</th>
-                <th>Setor</th>
-                <th>Resultado</th>
-                <th>Impacto</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Materiais rastreáveis</td><td>Estoque geral</td><td>236 de 248</td><td>Alto</td><td><span class="tag ok">Normal</span></td></tr>
-              <tr><td>Itens pendentes</td><td>Recebimento</td><td>12 registros</td><td>Médio</td><td><span class="tag alert">Atenção</span></td></tr>
-              <tr><td>Etiquetas não impressas</td><td>Identificação</td><td>12 etiquetas</td><td>Médio</td><td><span class="tag alert">Atenção</span></td></tr>
-              <tr><td>Materiais bloqueados</td><td>Qualidade</td><td>3 registros</td><td>Baixo</td><td><span class="tag gray">Normal</span></td></tr>
-              <tr><td>Falhas de localização</td><td>Almoxarifado</td><td>1 ocorrência</td><td>Baixo</td><td><span class="tag ok">Normal</span></td></tr>
-            </tbody>
-          </table>
+        <div class="filter-group">
+          <label for="tipo_movimentacao">Tipo de movimentação</label>
+          <select id="tipo_movimentacao" name="tipo_movimentacao">
+            <option value="">Todos os tipos</option>
+            <option value="Entrada" {% if filtros.tipo_movimentacao == 'Entrada' %}selected{% endif %}>Entrada</option>
+            <option value="Saída" {% if filtros.tipo_movimentacao == 'Saída' %}selected{% endif %}>Saída</option>
+            <option value="Transferência" {% if filtros.tipo_movimentacao == 'Transferência' %}selected{% endif %}>Transferência</option>
+            <option value="Correção de localização" {% if filtros.tipo_movimentacao == 'Correção de localização' %}selected{% endif %}>Correção de localização</option>
+            <option value="Bloqueio de material" {% if filtros.tipo_movimentacao == 'Bloqueio de material' %}selected{% endif %}>Bloqueio de material</option>
+          </select>
         </div>
-      </section>
+
+        <div class="filter-group">
+          <label for="data_inicio">Data inicial</label>
+          <input id="data_inicio" name="data_inicio" type="date" value="{{ '' if filtros.data_inicio == '1000-01-01' else filtros.data_inicio }}">
+        </div>
+
+        <div class="filter-group">
+          <label for="data_fim">Data final</label>
+          <input id="data_fim" name="data_fim" type="date" value="{{ filtros.data_fim }}">
+        </div>
+
+        <div class="filter-group">
+          <label for="responsavel">Responsável</label>
+          <select id="responsavel" name="responsavel">
+            <option value="">Todos</option>
+            {% if dados %}
+              {% for responsavel in dados.opcoes.responsaveis %}
+                <option value="{{ responsavel }}" {% if filtros.responsavel == responsavel %}selected{% endif %}>{{ responsavel }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+
+        <div class="filter-group wide-filter">
+          <label for="busca">Busca</label>
+          <input id="busca" name="busca" type="text" value="{{ filtros.busca }}" placeholder="Código, material, local, fornecedor ou responsável">
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-primary" type="submit">Gerar relatório</button>
+          <a class="btn-secondary" href="{{ url_for('relatorios') }}">Limpar</a>
+        </div>
+      </form>
+
+      {% if dados %}
+        <section class="report-actions panel no-print">
+          <div>
+            <h2>Resumo executivo</h2>
+            <p>Empresa: <strong>{{ dados.empresa_nome }}</strong> · Emitido por <strong>{{ dados.usuario_nome }}</strong> em {{ dados.emitido_em }}</p>
+          </div>
+          <div class="export-buttons">
+            <button class="btn-primary" type="button" data-export-url="{{ url_for('relatorios_pdf') }}" onclick="exportarRelatorio(this.dataset.exportUrl)">📄 Exportar PDF</button>
+            <button class="btn-secondary" type="button" data-export-url="{{ url_for('relatorios_excel') }}" onclick="exportarRelatorio(this.dataset.exportUrl)">📊 Exportar Excel</button>
+            <button class="btn-secondary" type="button" data-print-url="{{ url_for('relatorios') }}" onclick="imprimirRelatorio(this.dataset.printUrl)">🖨️ Imprimir</button>
+          </div>
+        </section>
+
+        <section class="metrics six-metrics">
+          <div class="metric-card">
+            <div class="metric-top"><div class="metric-icon blue">▣</div><span>Materiais</span></div>
+            <strong>{{ dados.resumo.total_materiais }}</strong>
+            <small>itens cadastrados</small>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><div class="metric-icon green">▦</div><span>Etiquetas</span></div>
+            <strong>{{ dados.resumo.total_etiquetas }}</strong>
+            <small>QR Codes gerados</small>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><div class="metric-icon red">!</div><span>Pendências</span></div>
+            <strong>{{ dados.resumo.total_pendentes }}</strong>
+            <small>materiais pendentes</small>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><div class="metric-icon gray">↻</div><span>Movimentações</span></div>
+            <strong>{{ dados.resumo.total_movimentacoes }}</strong>
+            <small>no período</small>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><div class="metric-icon blue">↓</div><span>Entradas</span></div>
+            <strong>{{ dados.resumo.entradas }}</strong>
+            <small>registros</small>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top"><div class="metric-icon red">↑</div><span>Saídas</span></div>
+            <strong>{{ dados.resumo.saidas }}</strong>
+            <small>registros</small>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Indicador mensal de movimentações</h2>
+                <p>Comparativo real de entradas, saídas e transferências dos últimos meses.</p>
+              </div>
+              <span class="tag info">Mensal</span>
+            </div>
+
+            <div class="chart large-chart">
+              {% for mes in dados.grafico_mensal %}
+                <div class="bar-group">
+                  <div class="bar entrada" data-height="{{ mes.entrada }}" title="Entradas: {{ mes.entrada_total }}"></div>
+                  <div class="bar saida" data-height="{{ mes.saida }}" title="Saídas: {{ mes.saida_total }}"></div>
+                  <div class="bar transferencia" data-height="{{ mes.transferencia }}" title="Transferências: {{ mes.transferencia_total }}"></div>
+                  <small>{{ mes.mes }}</small>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="legend">
+              <span><i class="entrada-dot"></i> Entradas</span>
+              <span><i class="saida-dot"></i> Saídas</span>
+              <span><i class="transferencia-dot"></i> Transferências</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Resumo operacional</h2>
+                <p>Indicadores de controle e rastreabilidade do estoque.</p>
+              </div>
+            </div>
+
+            <div class="efficiency-list">
+              <div class="efficiency-item">
+                <div>
+                  <strong>Rastreabilidade</strong>
+                  <small>Etiquetas geradas para controle por QR Code.</small>
+                </div>
+                <span>{{ dados.resumo.total_etiquetas }}</span>
+              </div>
+
+              <div class="efficiency-item">
+                <div>
+                  <strong>Materiais pendentes</strong>
+                  <small>Itens que ainda exigem atenção operacional.</small>
+                </div>
+                <span>{{ dados.resumo.total_pendentes }}</span>
+              </div>
+
+              <div class="efficiency-item">
+                <div>
+                  <strong>Transferências</strong>
+                  <small>Movimentações de troca de localização no período.</small>
+                </div>
+                <span>{{ dados.resumo.transferencias }}</span>
+              </div>
+
+              <div class="efficiency-item">
+                <div>
+                  <strong>Bloqueios</strong>
+                  <small>Materiais bloqueados ou registros de bloqueio no período.</small>
+                </div>
+                <span>{{ dados.resumo.bloqueios }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-grid bottom-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Relatórios disponíveis</h2>
+                <p>Modelos prontos para exportar ou imprimir.</p>
+              </div>
+            </div>
+
+            <div class="report-list">
+              <a class="report-item" href="{{ url_for('relatorios', tipo_relatorio='geral', periodo=filtros.periodo) }}">
+                <div class="report-icon blue">01</div>
+                <div><strong>Relatório geral de estoque</strong><small>Materiais, lotes, quantidades, localização e status.</small></div>
+                <span class="small-btn">Abrir</span>
+              </a>
+
+              <a class="report-item" href="{{ url_for('relatorios', tipo_relatorio='movimentacoes', periodo=filtros.periodo) }}">
+                <div class="report-icon green">02</div>
+                <div><strong>Histórico de movimentações</strong><small>Entradas, saídas, transferências e bloqueios.</small></div>
+                <span class="small-btn">Abrir</span>
+              </a>
+
+              <a class="report-item" href="{{ url_for('relatorios', tipo_relatorio='bloqueados', periodo=filtros.periodo, status='Bloqueado') }}">
+                <div class="report-icon red">03</div>
+                <div><strong>Materiais bloqueados</strong><small>Itens bloqueados para análise ou controle de qualidade.</small></div>
+                <span class="small-btn">Abrir</span>
+              </a>
+
+              <a class="report-item" href="{{ url_for('relatorios_pdf') }}{% if qs %}?{{ qs }}{% endif %}">
+                <div class="report-icon gray">04</div>
+                <div><strong>Documento para impressão</strong><small>Gere um PDF com cabeçalho corporativo do CodeStock.</small></div>
+                <span class="small-btn">PDF</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Últimas ocorrências</h2>
+                <p>Eventos relevantes para análise operacional.</p>
+              </div>
+            </div>
+
+            <div class="timeline">
+              {% for ocorrencia in dados.ocorrencias %}
+                <div class="timeline-item">
+                  <strong>{{ ocorrencia.titulo }}</strong>
+                  <small>{{ ocorrencia.descricao }}</small>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </section>
+
+        <section class="panel report-table-section">
+          <div class="panel-header">
+            <div>
+              <h2>Tabela analítica</h2>
+              <p>Resultado consolidado conforme o tipo de relatório selecionado.</p>
+            </div>
+            <button class="btn-secondary no-print" type="button" onclick="limparTabela()">Limpar filtro da tabela</button>
+          </div>
+
+          <div class="filters-table no-print">
+            <input type="text" id="buscaTabela" placeholder="Buscar na tabela..." onkeyup="filtrarTabela()">
+            <select id="statusFiltro" onchange="filtrarTabela()">
+              <option value="">Todos os status</option>
+              <option>Normal</option>
+              <option>Atenção</option>
+              <option>Crítico</option>
+              <option>Liberado</option>
+              <option>Pendente</option>
+              <option>Bloqueado</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            {% if filtros.tipo_relatorio == 'movimentacoes' %}
+              <table class="table" id="relatoriosTabela">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Código</th>
+                    <th>Material</th>
+                    <th>Origem</th>
+                    <th>Destino</th>
+                    <th>Qtd.</th>
+                    <th>Responsável</th>
+                    <th>Validação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for mov in dados.movimentacoes %}
+                    <tr>
+                      <td>{{ mov.data }}</td>
+                      <td>{{ mov.tipo }}</td>
+                      <td>{{ mov.material_codigo }}</td>
+                      <td>{{ mov.material_descricao or '-' }}</td>
+                      <td>{{ mov.origem or '-' }}</td>
+                      <td>{{ mov.destino or '-' }}</td>
+                      <td>{{ mov.quantidade }}</td>
+                      <td>{{ mov.responsavel or '-' }}</td>
+                      <td><span class="tag info">{{ mov.validacao }}</span></td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="9">Nenhuma movimentação encontrada.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              <table class="table" id="relatoriosTabela">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Lote</th>
+                    <th>Fornecedor</th>
+                    <th>Qtd.</th>
+                    <th>Unidade</th>
+                    <th>Localização</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for mat in dados.materiais %}
+                    <tr>
+                      <td>{{ mat.codigo }}</td>
+                      <td>{{ mat.descricao }}</td>
+                      <td>{{ mat.lote or '-' }}</td>
+                      <td>{{ mat.fornecedor or '-' }}</td>
+                      <td>{{ mat.quantidade }}</td>
+                      <td>{{ mat.unidade or '-' }}</td>
+                      <td>{{ mat.localizacao or '-' }}</td>
+                      <td><span class="tag info">{{ mat.status }}</span></td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="8">Nenhum material encontrado.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endif %}
+          </div>
+        </section>
+      {% endif %}
     </main>
   </div>
 
   <script src="{{ url_for('static', filename='js/relatorios.js') }}"></script>
+  <script>
+    document.querySelectorAll(".bar[data-height]").forEach(function (bar) {
+      bar.style.height = bar.dataset.height + "%";
+    });
+  </script>
 </body>
 </html>
