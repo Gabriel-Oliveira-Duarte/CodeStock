@@ -82,3 +82,131 @@
 .input-box input[readonly]{background:#edf4fb;color:var(--cinza);cursor:not-allowed}
 @media(max-width:1180px){.filters-advanced{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.filters-advanced{grid-template-columns:1fr}}
+
+
+/* ===== CORREÇÃO GLOBAL DA SIDEBAR =====
+   Mantém a sidebar ocupando toda a altura da tela e permite rolagem interna
+   para acessar o usuário logado e o botão "Sair do sistema". */
+@media (min-width: 1181px) {
+  .layout {
+    min-height: 100vh;
+    background: var(--azul-marinho);
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  }
+
+  .sidebar > div:first-child {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.42);
+  }
+}
+
+
+/* =========================================================
+   Responsividade - Movimentações
+   ========================================================= */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-group.full {
+    grid-column: auto !important;
+  }
+
+  .panel {
+    padding: 20px !important;
+    border-radius: 22px !important;
+  }
+
+  .panel-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .filters,
+  .filter-row,
+  .actions-row,
+  .form-actions {
+    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .table-wrap,
+  .table-container {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 760px !important;
+  }
+
+  .chart {
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    padding-bottom: 8px;
+  }
+
+  .bar-group {
+    min-width: 68px;
+  }
+}

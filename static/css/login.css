@@ -651,3 +651,89 @@
   border: none;
   border-top: 1px solid #e5e7eb;
 }
+/* =========================================================
+   Responsividade - Login e login do funcionário
+   ========================================================= */
+@media (max-width: 1100px) {
+  .page {
+    grid-template-columns: 1fr !important;
+    min-height: 100vh;
+  }
+
+  .info-side,
+  .login-side {
+    min-height: auto !important;
+  }
+
+  .info-side {
+    padding: 36px 6% !important;
+  }
+
+  .login-side {
+    padding: 36px 6% 48px !important;
+  }
+
+  .login-card {
+    width: min(100%, 620px) !important;
+    margin: 0 auto !important;
+  }
+}
+
+@media (max-width: 720px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .info-side,
+  .login-side {
+    padding: 28px 18px !important;
+  }
+
+  .brand-row,
+  .login-header,
+  .register-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .info-content h1,
+  .login-header h2 {
+    font-size: clamp(26px, 8vw, 36px) !important;
+  }
+
+  .flow-steps {
+    grid-template-columns: 1fr !important;
+  }
+
+  .login-card {
+    padding: 24px !important;
+    border-radius: 24px !important;
+  }
+
+  .step-indicator,
+  .profile-grid,
+  .form-options {
+    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .profile-option label {
+    justify-content: center !important;
+  }
+
+  .btn-submit,
+  .btn-secondary-action,
+  .login-links a {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  .footer-note {
+    position: static !important;
+    margin-top: 28px !important;
+  }
+}

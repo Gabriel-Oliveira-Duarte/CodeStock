@@ -1,3 +1,8 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar_responsive.css') }}">
+
+<button class="sidebar-mobile-toggle" type="button" id="sidebarMobileToggle" aria-label="Abrir menu lateral" aria-controls="sidebar" aria-expanded="false">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
 <aside class="sidebar" id="sidebar">
   <div>
     <a class="logo" href="{{ url_for('home') }}">
@@ -106,7 +111,6 @@
   </div>
 
   <div class="sidebar-footer">
-    <button class="theme-toggle" type="button" id="themeToggle">Tema: Claro</button>
 
     <div class="user-card">
       <span>Usuário logado</span>
@@ -116,3 +120,5 @@
     <a class="logout" href="{{ url_for('logout') }}">Sair do sistema</a>
   </div>
 </aside>
+
+<script src="{{ url_for('static', filename='js/sidebar.js') }}" defer></script>

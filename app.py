@@ -1578,19 +1578,17 @@ def excluir_usuario(usuario_id):
 
 
 def _normalizar_periodo(periodo, data_inicio, data_fim):
+    from datetime import timedelta
+
     hoje = date.today()
 
     if data_inicio:
         inicio = data_inicio
     elif periodo == "7":
-        inicio = hoje.replace().isoformat()
-        from datetime import timedelta
         inicio = (hoje - timedelta(days=7)).isoformat()
     elif periodo == "30":
-        from datetime import timedelta
         inicio = (hoje - timedelta(days=30)).isoformat()
     elif periodo == "90":
-        from datetime import timedelta
         inicio = (hoje - timedelta(days=90)).isoformat()
     elif periodo == "ano":
         inicio = date(hoje.year, 1, 1).isoformat()
@@ -1602,18 +1600,36 @@ def _normalizar_periodo(periodo, data_inicio, data_fim):
 
 
 def _filtros_relatorios():
+    periodos_validos = {"7", "30", "90", "ano", "todos"}
+    tipos_validos = {"geral", "materiais", "movimentacoes", "bloqueados"}
+    tipos_mov_validos = {"", "Entrada", "Saída", "Transferência", "Correção de localização", "Bloqueio de material"}
+
     periodo = request.args.get("periodo", "30").strip()
+    if periodo not in periodos_validos:
+        periodo = "30"
+
+    tipo_relatorio = request.args.get("tipo_relatorio", "geral").strip()
+    if tipo_relatorio not in tipos_validos:
+        tipo_relatorio = "geral"
+
+    tipo_movimentacao = request.args.get("tipo_movimentacao", "").strip()
+    if tipo_movimentacao not in tipos_mov_validos:
+        tipo_movimentacao = ""
+
     data_inicio = request.args.get("data_inicio", "").strip()
     data_fim = request.args.get("data_fim", "").strip()
     data_inicio, data_fim = _normalizar_periodo(periodo, data_inicio, data_fim)
 
+    if data_inicio > data_fim:
+        data_inicio, data_fim = data_fim, data_inicio
+
     return {
         "periodo": periodo,
-        "tipo_relatorio": request.args.get("tipo_relatorio", "geral").strip(),
+        "tipo_relatorio": tipo_relatorio,
         "data_inicio": data_inicio,
         "data_fim": data_fim,
         "status": request.args.get("status", "").strip(),
-        "tipo_movimentacao": request.args.get("tipo_movimentacao", "").strip(),
+        "tipo_movimentacao": tipo_movimentacao,
         "busca": request.args.get("busca", "").strip(),
         "responsavel": request.args.get("responsavel", "").strip()
     }
@@ -1651,35 +1667,93 @@ def _buscar_relatorio_dados(conn, empresa_id, filtros):
     }
 
     try:
-        cursor.execute("SELECT COUNT(*) AS total FROM materiais WHERE empresa_id = %s", (empresa_id,))
-        total_materiais = cursor.fetchone()["total"]
+        cursor.execute("""
+            SELECT DISTINCT responsavel
+            FROM movimentacoes
+            WHERE empresa_id = %s AND responsavel IS NOT NULL AND responsavel <> ''
+            ORDER BY responsavel
+        """, (empresa_id,))
+        dados["opcoes"]["responsaveis"] = [r["responsavel"] for r in cursor.fetchall()]
+        dados["opcoes"]["status"] = ["Liberado", "Pendente", "Conferência", "Bloqueado"]
+
+        sql_mat = """
+            SELECT codigo, descricao, lote, fornecedor, quantidade, unidade,
+                   localizacao, status, data_entrada, responsavel, criado_em
+            FROM materiais
+            WHERE empresa_id = %s
+        """
+        params_mat = [empresa_id]
+
+        status_material = filtros["status"]
+        if filtros["tipo_relatorio"] == "bloqueados":
+            status_material = "Bloqueado"
+
+        if status_material:
+            sql_mat += " AND status = %s"
+            params_mat.append(status_material)
+
+        if filtros["busca"]:
+            sql_mat += """
+                AND (
+                    codigo LIKE %s OR descricao LIKE %s OR lote LIKE %s
+                    OR fornecedor LIKE %s OR localizacao LIKE %s OR responsavel LIKE %s
+                )
+            """
+            termo = f"%{filtros['busca']}%"
+            params_mat.extend([termo, termo, termo, termo, termo, termo])
+
+        sql_mat += " ORDER BY criado_em DESC"
+        cursor.execute(sql_mat, params_mat)
+        dados["materiais"] = cursor.fetchall()
+
+        sql_mov = """
+            SELECT m.tipo, m.material_codigo, mat.descricao AS material_descricao,
+                   m.origem, m.destino, m.quantidade, m.data, m.responsavel,
+                   m.validacao, m.observacao, m.criado_em
+            FROM movimentacoes m
+            LEFT JOIN materiais mat
+              ON mat.empresa_id = m.empresa_id
+             AND mat.codigo = m.material_codigo
+            WHERE m.empresa_id = %s
+              AND m.data BETWEEN %s AND %s
+        """
+        params_mov = [empresa_id, filtros["data_inicio"], filtros["data_fim"]]
+
+        if filtros["tipo_movimentacao"]:
+            sql_mov += " AND m.tipo = %s"
+            params_mov.append(filtros["tipo_movimentacao"])
+
+        if filtros["responsavel"]:
+            sql_mov += " AND m.responsavel = %s"
+            params_mov.append(filtros["responsavel"])
+
+        if filtros["busca"]:
+            sql_mov += """
+                AND (
+                    m.material_codigo LIKE %s OR mat.descricao LIKE %s
+                    OR m.origem LIKE %s OR m.destino LIKE %s OR m.responsavel LIKE %s
+                    OR m.observacao LIKE %s
+                )
+            """
+            termo = f"%{filtros['busca']}%"
+            params_mov.extend([termo, termo, termo, termo, termo, termo])
+
+        sql_mov += " ORDER BY m.criado_em DESC"
+        cursor.execute(sql_mov, params_mov)
+        dados["movimentacoes"] = cursor.fetchall()
+
+        total_materiais = len(dados["materiais"])
+        total_movimentacoes = len(dados["movimentacoes"])
+        total_pendentes = sum(1 for m in dados["materiais"] if m.get("status") == "Pendente")
+        total_bloqueados = sum(1 for m in dados["materiais"] if m.get("status") == "Bloqueado")
 
         cursor.execute("SELECT COUNT(*) AS total FROM etiquetas WHERE empresa_id = %s", (empresa_id,))
         total_etiquetas = cursor.fetchone()["total"]
 
-        cursor.execute("SELECT COUNT(*) AS total FROM materiais WHERE empresa_id = %s AND status = 'Pendente'", (empresa_id,))
-        total_pendentes = cursor.fetchone()["total"]
-
-        cursor.execute("SELECT COUNT(*) AS total FROM materiais WHERE empresa_id = %s AND status = 'Bloqueado'", (empresa_id,))
-        total_bloqueados = cursor.fetchone()["total"]
-
-        cursor.execute("""
-            SELECT COUNT(*) AS total
-            FROM movimentacoes
-            WHERE empresa_id = %s AND data BETWEEN %s AND %s
-        """, (empresa_id, filtros["data_inicio"], filtros["data_fim"]))
-        total_movimentacoes = cursor.fetchone()["total"]
-
-        cursor.execute("""
-            SELECT
-                SUM(CASE WHEN tipo = 'Entrada' THEN 1 ELSE 0 END) AS entradas,
-                SUM(CASE WHEN tipo = 'Saída' THEN 1 ELSE 0 END) AS saidas,
-                SUM(CASE WHEN tipo = 'Transferência' THEN 1 ELSE 0 END) AS transferencias,
-                SUM(CASE WHEN tipo = 'Bloqueio de material' THEN 1 ELSE 0 END) AS bloqueios
-            FROM movimentacoes
-            WHERE empresa_id = %s AND data BETWEEN %s AND %s
-        """, (empresa_id, filtros["data_inicio"], filtros["data_fim"]))
-        mov_resumo = cursor.fetchone() or {}
+        entradas = sum(1 for m in dados["movimentacoes"] if m.get("tipo") == "Entrada")
+        saidas = sum(1 for m in dados["movimentacoes"] if m.get("tipo") == "Saída")
+        transferencias = sum(1 for m in dados["movimentacoes"] if m.get("tipo") == "Transferência")
+        bloqueios = sum(1 for m in dados["movimentacoes"] if m.get("tipo") == "Bloqueio de material")
 
         dados["resumo"] = {
             "total_materiais": total_materiais,
@@ -1687,34 +1761,27 @@ def _buscar_relatorio_dados(conn, empresa_id, filtros):
             "total_pendentes": total_pendentes,
             "total_bloqueados": total_bloqueados,
             "total_movimentacoes": total_movimentacoes,
-            "entradas": mov_resumo.get("entradas") or 0,
-            "saidas": mov_resumo.get("saidas") or 0,
-            "transferencias": mov_resumo.get("transferencias") or 0,
-            "bloqueios": mov_resumo.get("bloqueios") or 0
+            "entradas": entradas,
+            "saidas": saidas,
+            "transferencias": transferencias,
+            "bloqueios": bloqueios
         }
 
         meses = _ultimos_6_meses()
         grafico = {chave: {"mes": label, "entrada": 0, "saida": 0, "transferencia": 0} for chave, label in meses}
 
-        cursor.execute("""
-            SELECT DATE_FORMAT(data, '%Y-%m') AS mes, tipo, COUNT(*) AS total
-            FROM movimentacoes
-            WHERE empresa_id = %s
-              AND data >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-              AND tipo IN ('Entrada', 'Saída', 'Transferência')
-            GROUP BY mes, tipo
-            ORDER BY mes
-        """, (empresa_id,))
-
-        for row in cursor.fetchall():
-            chave = row["mes"]
+        for mov in dados["movimentacoes"]:
+            data_mov = mov.get("data")
+            if not data_mov:
+                continue
+            chave = data_mov.strftime("%Y-%m") if hasattr(data_mov, "strftime") else str(data_mov)[:7]
             if chave in grafico:
-                if row["tipo"] == "Entrada":
-                    grafico[chave]["entrada"] = row["total"]
-                elif row["tipo"] == "Saída":
-                    grafico[chave]["saida"] = row["total"]
-                elif row["tipo"] == "Transferência":
-                    grafico[chave]["transferencia"] = row["total"]
+                if mov.get("tipo") == "Entrada":
+                    grafico[chave]["entrada"] += 1
+                elif mov.get("tipo") == "Saída":
+                    grafico[chave]["saida"] += 1
+                elif mov.get("tipo") == "Transferência":
+                    grafico[chave]["transferencia"] += 1
 
         max_valor = max([max(v["entrada"], v["saida"], v["transferencia"]) for v in grafico.values()] + [1])
         dados["grafico_mensal"] = [
@@ -1730,97 +1797,34 @@ def _buscar_relatorio_dados(conn, empresa_id, filtros):
             for v in grafico.values()
         ]
 
-        sql_mat = """
-            SELECT codigo, descricao, lote, fornecedor, quantidade, unidade, localizacao, status, data_entrada, responsavel
-            FROM materiais
-            WHERE empresa_id = %s
-        """
-        params_mat = [empresa_id]
-
-        if filtros["status"]:
-            sql_mat += " AND status = %s"
-            params_mat.append(filtros["status"])
-
-        if filtros["busca"]:
-            sql_mat += """
-                AND (
-                    codigo LIKE %s OR descricao LIKE %s OR lote LIKE %s OR fornecedor LIKE %s OR localizacao LIKE %s
-                )
-            """
-            termo = f"%{filtros['busca']}%"
-            params_mat.extend([termo, termo, termo, termo, termo])
-
-        sql_mat += " ORDER BY criado_em DESC"
-        cursor.execute(sql_mat, params_mat)
-        dados["materiais"] = cursor.fetchall()
-
-        sql_mov = """
-            SELECT m.tipo, m.material_codigo, mat.descricao AS material_descricao, m.origem, m.destino,
-                   m.quantidade, m.data, m.responsavel, m.validacao, m.observacao, m.criado_em
-            FROM movimentacoes m
-            LEFT JOIN materiais mat ON mat.empresa_id = m.empresa_id AND mat.codigo = m.material_codigo
-            WHERE m.empresa_id = %s AND m.data BETWEEN %s AND %s
-        """
-        params_mov = [empresa_id, filtros["data_inicio"], filtros["data_fim"]]
-
-        if filtros["tipo_movimentacao"]:
-            sql_mov += " AND m.tipo = %s"
-            params_mov.append(filtros["tipo_movimentacao"])
-
-        if filtros["responsavel"]:
-            sql_mov += " AND m.responsavel = %s"
-            params_mov.append(filtros["responsavel"])
-
-        if filtros["busca"]:
-            sql_mov += """
-                AND (
-                    m.material_codigo LIKE %s OR mat.descricao LIKE %s OR m.origem LIKE %s OR m.destino LIKE %s OR m.responsavel LIKE %s
-                )
-            """
-            termo = f"%{filtros['busca']}%"
-            params_mov.extend([termo, termo, termo, termo, termo])
-
-        sql_mov += " ORDER BY m.criado_em DESC"
-        cursor.execute(sql_mov, params_mov)
-        dados["movimentacoes"] = cursor.fetchall()
-
-        cursor.execute("""
-            SELECT DISTINCT responsavel
-            FROM movimentacoes
-            WHERE empresa_id = %s AND responsavel IS NOT NULL AND responsavel <> ''
-            ORDER BY responsavel
-        """, (empresa_id,))
-        dados["opcoes"]["responsaveis"] = [r["responsavel"] for r in cursor.fetchall()]
-        dados["opcoes"]["status"] = ["Liberado", "Pendente", "Conferência", "Bloqueado"]
-
         dados["tabela_analitica"] = [
             {
-                "indicador": "Materiais rastreáveis",
+                "indicador": "Materiais filtrados",
                 "setor": "Estoque geral",
-                "resultado": f"{total_etiquetas} etiquetas / {total_materiais} materiais",
-                "impacto": "Alto",
-                "status": "Normal" if total_materiais == 0 or total_etiquetas >= max(1, int(total_materiais * 0.75)) else "Atenção"
+                "resultado": f"{total_materiais} registro(s)",
+                "impacto": "Médio",
+                "status": "Normal"
             },
             {
-                "indicador": "Itens pendentes",
+                "indicador": "Movimentações filtradas",
+                "setor": "Operação",
+                "resultado": f"{total_movimentacoes} registro(s)",
+                "impacto": "Médio",
+                "status": "Normal"
+            },
+            {
+                "indicador": "Materiais pendentes",
                 "setor": "Recebimento",
-                "resultado": f"{total_pendentes} registros",
+                "resultado": f"{total_pendentes} registro(s)",
                 "impacto": "Médio",
                 "status": "Atenção" if total_pendentes else "Normal"
             },
             {
                 "indicador": "Materiais bloqueados",
                 "setor": "Qualidade",
-                "resultado": f"{total_bloqueados} registros",
+                "resultado": f"{total_bloqueados} registro(s)",
                 "impacto": "Alto" if total_bloqueados else "Baixo",
                 "status": "Crítico" if total_bloqueados >= 5 else ("Atenção" if total_bloqueados else "Normal")
-            },
-            {
-                "indicador": "Movimentações no período",
-                "setor": "Operação",
-                "resultado": f"{total_movimentacoes} registros",
-                "impacto": "Médio",
-                "status": "Normal"
             }
         ]
 
@@ -1829,9 +1833,10 @@ def _buscar_relatorio_dados(conn, empresa_id, filtros):
             dados["ocorrencias"].append({"titulo": f"{total_pendentes} material(is) pendente(s)", "descricao": "Itens aguardando liberação, conferência ou regularização."})
         if total_bloqueados:
             dados["ocorrencias"].append({"titulo": f"{total_bloqueados} material(is) bloqueado(s)", "descricao": "Registros com status bloqueado para análise ou controle de qualidade."})
+        if total_movimentacoes:
+            dados["ocorrencias"].append({"titulo": f"{total_movimentacoes} movimentação(ões)", "descricao": "Registros encontrados conforme os filtros aplicados."})
         if not dados["ocorrencias"]:
-            dados["ocorrencias"].append({"titulo": "Nenhuma ocorrência crítica", "descricao": "Não há materiais bloqueados ou pendências relevantes no momento."})
-        dados["ocorrencias"].append({"titulo": f"{total_movimentacoes} movimentação(ões) no período", "descricao": "Inclui entradas, saídas, transferências e alterações operacionais."})
+            dados["ocorrencias"].append({"titulo": "Nenhum registro crítico", "descricao": "Nenhuma ocorrência relevante encontrada conforme os filtros."})
 
     finally:
         cursor.close()
@@ -1841,12 +1846,12 @@ def _buscar_relatorio_dados(conn, empresa_id, filtros):
 
 def _linhas_exportacao(dados, tipo_relatorio):
     if tipo_relatorio == "movimentacoes":
-        cabecalho = ["Data", "Tipo", "Código", "Material", "Origem", "Destino", "Quantidade", "Responsável", "Validação"]
+        cabecalho = ["Data", "Tipo", "Código", "Material", "Origem", "Destino", "Quantidade", "Responsável", "Validação", "Observação"]
         linhas = [
             [
                 str(m.get("data") or ""), m.get("tipo") or "", m.get("material_codigo") or "",
                 m.get("material_descricao") or "", m.get("origem") or "", m.get("destino") or "",
-                float(m.get("quantidade") or 0), m.get("responsavel") or "", m.get("validacao") or ""
+                float(m.get("quantidade") or 0), m.get("responsavel") or "", m.get("validacao") or "", m.get("observacao") or ""
             ] for m in dados["movimentacoes"]
         ]
     elif tipo_relatorio == "bloqueados":
@@ -1864,6 +1869,16 @@ def _linhas_exportacao(dados, tipo_relatorio):
             for m in dados["materiais"]
         ]
     return cabecalho, linhas
+
+
+def _titulo_relatorio(tipo_relatorio):
+    if tipo_relatorio == "movimentacoes":
+        return "Relatório de Movimentações"
+    if tipo_relatorio == "bloqueados":
+        return "Relatório de Materiais Bloqueados"
+    if tipo_relatorio == "materiais":
+        return "Relatório de Materiais"
+    return "Relatório Geral de Estoque"
 
 
 @app.route("/relatorios")
@@ -1892,9 +1907,9 @@ def relatorios_pdf():
     try:
         from reportlab.lib import colors
         from reportlab.lib.pagesizes import A4, landscape
-        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import mm
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
     except Exception:
         flash("Dependência reportlab não instalada. Rode: pip install reportlab", "erro")
         return redirect(url_for("relatorios"))
@@ -1911,93 +1926,106 @@ def relatorios_pdf():
     finally:
         conn.close()
 
-    cabecalho, linhas = _linhas_exportacao(dados, filtros["tipo_relatorio"])
-
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
         pagesize=landscape(A4),
-        rightMargin=10 * mm,
-        leftMargin=10 * mm,
-        topMargin=10 * mm,
-        bottomMargin=10 * mm
+        rightMargin=8 * mm,
+        leftMargin=8 * mm,
+        topMargin=8 * mm,
+        bottomMargin=8 * mm
     )
 
     styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name="SmallCell", parent=styles["BodyText"], fontSize=6.5, leading=8))
     story = []
 
-    tipo_relatorio = filtros.get("tipo_relatorio", "geral")
-    if tipo_relatorio == "movimentacoes":
-        titulo = "Relatório de Movimentações"
-    elif tipo_relatorio == "bloqueados":
-        titulo = "Relatório de Materiais Bloqueados"
-    else:
-        titulo = "Relatório de Estoque"
+    def add_header():
+        story.append(Paragraph("<b>CODESTOCK</b>", styles["Title"]))
+        story.append(Paragraph(f"<b>{_titulo_relatorio(filtros['tipo_relatorio'])}</b>", styles["Heading2"]))
+        story.append(Paragraph(f"Empresa: <b>{dados['empresa_nome']}</b>", styles["Normal"]))
+        story.append(Paragraph(f"Emitido por: <b>{dados['usuario_nome']}</b> em {dados['emitido_em']}", styles["Normal"]))
+        story.append(Paragraph(f"Período: {filtros['data_inicio']} até {filtros['data_fim']}", styles["Normal"]))
+        filtros_txt = []
+        if filtros.get("status"):
+            filtros_txt.append(f"Status: {filtros['status']}")
+        if filtros.get("tipo_movimentacao"):
+            filtros_txt.append(f"Tipo de movimentação: {filtros['tipo_movimentacao']}")
+        if filtros.get("responsavel"):
+            filtros_txt.append(f"Responsável: {filtros['responsavel']}")
+        if filtros.get("busca"):
+            filtros_txt.append(f"Busca: {filtros['busca']}")
+        if filtros_txt:
+            story.append(Paragraph("Filtros: " + " | ".join(filtros_txt), styles["Normal"]))
+        story.append(Spacer(1, 5 * mm))
 
-    story.append(Paragraph("<b>CODESTOCK</b>", styles["Title"]))
-    story.append(Paragraph(f"<b>{titulo}</b>", styles["Heading2"]))
-    story.append(Paragraph(f"Empresa: <b>{dados['empresa_nome']}</b>", styles["Normal"]))
-    story.append(Paragraph(f"Emitido por: <b>{dados['usuario_nome']}</b> em {dados['emitido_em']}", styles["Normal"]))
-    story.append(Paragraph(f"Período: {filtros['data_inicio']} até {filtros['data_fim']}", styles["Normal"]))
-    story.append(Spacer(1, 6 * mm))
-
-    resumo = dados["resumo"]
-    resumo_tabela = [
-        ["Materiais", "Movimentações", "Entradas", "Saídas", "Transferências", "Bloqueios"],
-        [
-            resumo.get("total_materiais", 0),
-            resumo.get("total_movimentacoes", 0),
-            resumo.get("entradas", 0),
-            resumo.get("saidas", 0),
-            resumo.get("transferencias", 0),
-            resumo.get("bloqueios", 0),
+        resumo = dados["resumo"]
+        resumo_tabela = [
+            ["Materiais", "Movimentações", "Entradas", "Saídas", "Transferências", "Bloqueios"],
+            [
+                resumo.get("total_materiais", 0), resumo.get("total_movimentacoes", 0),
+                resumo.get("entradas", 0), resumo.get("saidas", 0),
+                resumo.get("transferencias", 0), resumo.get("bloqueios", 0)
+            ]
         ]
-    ]
-    resumo_table = Table(resumo_tabela, repeatRows=1, hAlign="LEFT")
-    resumo_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#07182C")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#D8E2F0")),
-        ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#F7F7F7")),
-        ("PADDING", (0, 0), (-1, -1), 6),
-    ]))
-    story.append(resumo_table)
-    story.append(Spacer(1, 8 * mm))
-
-    story.append(Paragraph("<b>Dados analíticos</b>", styles["Heading3"]))
+        resumo_table = Table(resumo_tabela, repeatRows=1, hAlign="LEFT")
+        resumo_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#07182C")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#D8E2F0")),
+            ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#F7F7F7")),
+            ("PADDING", (0, 0), (-1, -1), 5),
+        ]))
+        story.append(resumo_table)
+        story.append(Spacer(1, 7 * mm))
 
     def celula(valor):
         texto = str(valor if valor is not None else "-")
-        return Paragraph(texto, styles["BodyText"])
+        texto = texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return Paragraph(texto, styles["SmallCell"])
 
-    dados_tabela = [[celula(col) for col in cabecalho]]
-    for linha in linhas:
-        dados_tabela.append([celula(valor) for valor in linha])
+    def add_table(titulo, cabecalho, linhas):
+        story.append(Paragraph(f"<b>{titulo}</b>", styles["Heading3"]))
+        dados_tabela = [[celula(col) for col in cabecalho]]
+        if linhas:
+            for linha in linhas:
+                dados_tabela.append([celula(valor) for valor in linha])
+        else:
+            dados_tabela.append([celula("Nenhum registro encontrado")] + [celula("") for _ in cabecalho[1:]])
 
-    if len(dados_tabela) == 1:
-        dados_tabela.append([celula("Nenhum registro encontrado")] + [celula("") for _ in cabecalho[1:]])
+        largura_util = landscape(A4)[0] - (16 * mm)
+        qtd_colunas = max(len(cabecalho), 1)
+        col_widths = [largura_util / qtd_colunas for _ in cabecalho]
+        tabela = Table(dados_tabela, repeatRows=1, colWidths=col_widths)
+        tabela.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2F7BE5")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 6.5),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#D8E2F0")),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F7FAFC")]),
+            ("PADDING", (0, 0), (-1, -1), 3),
+        ]))
+        story.append(tabela)
+        story.append(Spacer(1, 6 * mm))
 
-    largura_util = landscape(A4)[0] - (20 * mm)
-    qtd_colunas = max(len(cabecalho), 1)
-    col_widths = [largura_util / qtd_colunas for _ in cabecalho]
+    add_header()
 
-    tabela = Table(dados_tabela, repeatRows=1, colWidths=col_widths)
-    tabela.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2F7BE5")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 7),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#D8E2F0")),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F7FAFC")]),
-        ("PADDING", (0, 0), (-1, -1), 4),
-    ]))
-    story.append(tabela)
-    story.append(Spacer(1, 6 * mm))
+    tipo = filtros["tipo_relatorio"]
+    if tipo == "geral":
+        cab_mat, lin_mat = _linhas_exportacao(dados, "materiais")
+        cab_mov, lin_mov = _linhas_exportacao(dados, "movimentacoes")
+        add_table("Materiais", cab_mat, lin_mat)
+        story.append(PageBreak())
+        add_table("Movimentações", cab_mov, lin_mov)
+    else:
+        cabecalho, linhas = _linhas_exportacao(dados, tipo)
+        add_table(_titulo_relatorio(tipo), cabecalho, linhas)
+
     story.append(Paragraph("Documento gerado automaticamente pelo CodeStock.", styles["Italic"]))
-
     doc.build(story)
     buffer.seek(0)
 
@@ -2032,46 +2060,56 @@ def relatorios_excel():
     finally:
         conn.close()
 
-    cabecalho, linhas = _linhas_exportacao(dados, filtros["tipo_relatorio"])
+    def estilizar_planilha(ws, cabecalho, dados_linhas):
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max(6, len(cabecalho)))
+        ws.cell(row=1, column=1, value=f"CODESTOCK - {_titulo_relatorio(filtros['tipo_relatorio'])}")
+        ws.cell(row=1, column=1).font = Font(bold=True, size=14, color="FFFFFF")
+        ws.cell(row=1, column=1).fill = PatternFill("solid", fgColor="07182C")
+        ws.cell(row=1, column=1).alignment = Alignment(horizontal="center")
+        ws.append(["Empresa", dados["empresa_nome"]])
+        ws.append(["Emitido por", dados["usuario_nome"]])
+        ws.append(["Data de emissão", dados["emitido_em"]])
+        ws.append(["Período", f"{filtros['data_inicio']} até {filtros['data_fim']}"])
+        ws.append([])
+        ws.append(cabecalho)
+        header_row = ws.max_row
+        for cell in ws[header_row]:
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill("solid", fgColor="2F7BE5")
+            cell.alignment = Alignment(horizontal="center")
+        for linha in dados_linhas:
+            ws.append(linha)
+        if not dados_linhas:
+            ws.append(["Nenhum registro encontrado"])
+
+        thin = Side(border_style="thin", color="D8E2F0")
+        for row in ws.iter_rows(min_row=1, max_row=ws.max_row, max_col=max(6, len(cabecalho))):
+            for cell in row:
+                cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+                cell.alignment = Alignment(vertical="center")
+        for col in ws.columns:
+            max_len = 0
+            letter = col[0].column_letter
+            for cell in col:
+                max_len = max(max_len, len(str(cell.value or "")))
+            ws.column_dimensions[letter].width = min(max(max_len + 2, 12), 36)
 
     wb = Workbook()
-    ws = wb.active
-    ws.title = "Relatório CodeStock"
+    tipo = filtros["tipo_relatorio"]
 
-    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max(6, len(cabecalho)))
-    ws.cell(row=1, column=1, value="CODESTOCK - Relatório Operacional")
-    ws.cell(row=1, column=1).font = Font(bold=True, size=14, color="FFFFFF")
-    ws.cell(row=1, column=1).fill = PatternFill("solid", fgColor="07182C")
-    ws.cell(row=1, column=1).alignment = Alignment(horizontal="center")
-
-    ws.append(["Empresa", dados["empresa_nome"]])
-    ws.append(["Emitido por", dados["usuario_nome"]])
-    ws.append(["Data de emissão", dados["emitido_em"]])
-    ws.append(["Período", f"{filtros['data_inicio']} até {filtros['data_fim']}"])
-    ws.append([])
-    ws.append(cabecalho)
-
-    header_row = ws.max_row
-    for cell in ws[header_row]:
-        cell.font = Font(bold=True, color="FFFFFF")
-        cell.fill = PatternFill("solid", fgColor="2F7BE5")
-        cell.alignment = Alignment(horizontal="center")
-
-    for linha in linhas:
-        ws.append(linha)
-
-    thin = Side(border_style="thin", color="D8E2F0")
-    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, max_col=max(6, len(cabecalho))):
-        for cell in row:
-            cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
-            cell.alignment = Alignment(vertical="center")
-
-    for col in ws.columns:
-        max_len = 0
-        letter = col[0].column_letter
-        for cell in col:
-            max_len = max(max_len, len(str(cell.value or "")))
-        ws.column_dimensions[letter].width = min(max(max_len + 2, 12), 32)
+    if tipo == "geral":
+        ws = wb.active
+        ws.title = "Materiais"
+        cab_mat, lin_mat = _linhas_exportacao(dados, "materiais")
+        estilizar_planilha(ws, cab_mat, lin_mat)
+        ws2 = wb.create_sheet("Movimentações")
+        cab_mov, lin_mov = _linhas_exportacao(dados, "movimentacoes")
+        estilizar_planilha(ws2, cab_mov, lin_mov)
+    else:
+        ws = wb.active
+        ws.title = "Relatório"
+        cabecalho, linhas = _linhas_exportacao(dados, tipo)
+        estilizar_planilha(ws, cabecalho, linhas)
 
     buffer = BytesIO()
     wb.save(buffer)

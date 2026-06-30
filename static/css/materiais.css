@@ -923,3 +923,214 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ===== CORREÇÃO GLOBAL DA SIDEBAR =====
+   Mantém a sidebar ocupando toda a altura da tela e permite rolagem interna
+   para acessar o usuário logado e o botão "Sair do sistema". */
+@media (min-width: 1181px) {
+  .layout {
+    min-height: 100vh;
+    background: var(--azul-marinho);
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  }
+
+  .sidebar > div:first-child {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.42);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE - ETAPA 2: Materiais, edição e ficha
+   ========================================================= */
+@media (max-width: 1180px) {
+  .main {
+    padding-top: 78px;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cards-grid,
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .details-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .actions-panel {
+    grid-column: 1 / -1;
+  }
+
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .main {
+    padding: 76px 16px 22px;
+  }
+
+  .topbar,
+  .panel-header,
+  .timeline-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar-actions,
+  .panel-header .btn-secondary,
+  .panel-header .btn-primary,
+  .topbar .btn-primary,
+  .topbar .btn-secondary {
+    width: 100%;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger-full {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .metrics,
+  .cards-grid,
+  .details-side,
+  .filters,
+  .details-list,
+  .timeline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 18px;
+    border-radius: 20px;
+    overflow-x: visible;
+  }
+
+  .table-wrap {
+    margin: 0 -18px;
+    padding: 0 18px 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 860px;
+  }
+
+  .row-actions {
+    flex-wrap: nowrap;
+  }
+
+  .timeline-list {
+    gap: 14px;
+  }
+
+  .timeline-item {
+    grid-template-columns: 22px 1fr;
+    gap: 10px;
+  }
+
+  .timeline-marker {
+    width: 22px;
+    height: 22px;
+    border-width: 5px;
+  }
+
+  .timeline-content {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .timeline-head small {
+    font-size: 12px;
+  }
+
+  .movement-badge {
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+
+  .qr-image {
+    width: 170px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .topbar h1 {
+    font-size: 26px;
+  }
+
+  .topbar p,
+  .panel-header p {
+    font-size: 14px;
+  }
+
+  .metric-card,
+  .detail-item,
+  .observation-box,
+  .latest-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .table {
+    min-width: 780px;
+  }
+}

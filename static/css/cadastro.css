@@ -485,3 +485,61 @@
         grid-template-columns: 1fr;
       }
     }
+/* =========================================================
+   Responsividade extra - Cadastro empresarial
+   ========================================================= */
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr !important;
+  }
+
+  .info-side,
+  .form-side {
+    min-height: auto !important;
+  }
+
+  .form-grid,
+  .password-rules {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-group.full {
+    grid-column: auto !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .info-side,
+  .form-side {
+    padding: 26px 18px !important;
+  }
+
+  .register-card {
+    padding: 22px !important;
+    border-radius: 22px !important;
+  }
+
+  .benefit-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .terms-row,
+  .register-header,
+  .brand-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .btn-submit,
+  .btn-secondary,
+  .back-home {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}

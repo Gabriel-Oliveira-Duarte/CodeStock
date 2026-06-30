@@ -127,3 +127,141 @@ body{min-height:100vh;background:var(--branco);color:var(--azul-marinho)}
 @media(max-width:900px){.report-actions{flex-direction:column;align-items:flex-start}.export-buttons{width:100%;justify-content:flex-start}.filters-panel{grid-template-columns:1fr}.wide-filter{grid-column:span 1}.six-metrics{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.six-metrics{grid-template-columns:1fr}.export-buttons a,.export-buttons button,.filter-actions a,.filter-actions button{width:100%}}
 @media print{.sidebar,.mobile-menu-btn,.filters-panel,.no-print,.topbar .status{display:none!important}.layout{display:block}.main{padding:0;background:#fff}.panel,.metric-card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.content-grid,.bottom-grid,.metrics,.six-metrics{display:block}.metric-card{margin-bottom:10px}.chart{height:180px}.table{min-width:0;font-size:11px}.table th,.table td{padding:7px 5px}.topbar{margin-bottom:12px}.topbar h1{font-size:24px}}
+
+
+/* ===== CORREÇÃO GLOBAL DA SIDEBAR =====
+   Mantém a sidebar ocupando toda a altura da tela e permite rolagem interna
+   para acessar o usuário logado e o botão "Sair do sistema". */
+@media (min-width: 1181px) {
+  .layout {
+    min-height: 100vh;
+    background: var(--azul-marinho);
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  }
+
+  .sidebar > div:first-child {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.42);
+  }
+}
+
+
+/* =========================================================
+   Responsividade - Relatórios
+   ========================================================= */
+@media (max-width: 1180px) {
+  .filters-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .wide-filter,
+  .filter-actions {
+    grid-column: 1 / -1 !important;
+  }
+
+  .content-grid,
+  .bottom-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .six-metrics,
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar,
+  .panel-header,
+  .report-actions {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .filters-panel,
+  .six-metrics,
+  .metrics {
+    grid-template-columns: 1fr !important;
+  }
+
+  .filter-actions,
+  .export-buttons,
+  .filters-table {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .filter-actions button,
+  .filter-actions a,
+  .export-buttons button,
+  .export-buttons a,
+  .filters-table input,
+  .filters-table select {
+    width: 100% !important;
+  }
+
+  .panel {
+    padding: 20px !important;
+    border-radius: 22px !important;
+  }
+
+  .chart.large-chart {
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    padding-bottom: 8px;
+  }
+
+  .chart.large-chart .bar-group {
+    min-width: 68px;
+  }
+
+  .table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 860px !important;
+  }
+
+  .report-item {
+    align-items: flex-start !important;
+  }
+}

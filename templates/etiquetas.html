@@ -7,8 +7,6 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/etiquetas.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-
 </head>
 
 <body>
@@ -129,9 +127,9 @@
               </div>
 
               <div class="form-actions">
-                <button class="btn-primary" type="submit">🏷️ Gerar etiqueta</button>
-                <button class="btn-secondary" type="button" onclick="imprimirEtiqueta()">🖨️ Imprimir prévia</button>
-                <a class="btn-secondary disabled-link" id="pdfPreviewLink" href="#">📄 Baixar PDF</a>
+                <button class="btn-primary" type="submit">Gerar etiqueta</button>
+                <button class="btn-secondary" type="button" onclick="imprimirEtiqueta()">Imprimir prévia</button>
+                <a class="btn-secondary disabled-link" id="pdfPreviewLink" href="#">Baixar PDF</a>
                 <button class="btn-secondary" type="button" onclick="limparFormulario()">Limpar</button>
               </div>
 
@@ -284,8 +282,8 @@
           </div>
 
           <div class="preview-actions">
-            <button class="btn-primary" type="button" onclick="imprimirEtiqueta()">🖨️ Imprimir etiqueta</button>
-            <a class="btn-secondary disabled-link" id="pdfPreviewLinkAside" href="#">📄 Baixar PDF</a>
+            <button class="btn-primary" type="button" onclick="imprimirEtiqueta()">Imprimir etiqueta</button>
+            <a class="btn-secondary disabled-link" id="pdfPreviewLinkAside" href="#">Baixar PDF</a>
           </div>
 
           <div class="tips">
@@ -310,6 +308,5 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/etiquetas.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </body>
 </html>

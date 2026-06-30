@@ -917,3 +917,365 @@ select:focus {
     background: #f7f7f7 !important;
   }
 }
+
+
+/* ===== CORREÇÃO GLOBAL DA SIDEBAR =====
+   Mantém a sidebar ocupando toda a altura da tela e permite rolagem interna
+   para acessar o usuário logado e o botão "Sair do sistema". */
+@media (min-width: 1181px) {
+  .layout {
+    min-height: 100vh;
+    background: var(--azul-marinho);
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  }
+
+  .sidebar > div:first-child {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.42);
+  }
+}
+
+
+/* =========================================================
+   Responsividade - Etiquetas
+   ========================================================= */
+@media (max-width: 1100px) {
+  .etiquetas-grid,
+  .content-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar,
+  .panel-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-grid,
+  .filters {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-group.full-field,
+  .form-group.full {
+    grid-column: auto !important;
+  }
+
+  .panel {
+    padding: 20px !important;
+    border-radius: 22px !important;
+  }
+
+  .form-actions,
+  .export-buttons,
+  .filters {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary,
+  .export-buttons .btn-primary,
+  .export-buttons .btn-secondary,
+  .filters button,
+  .filters a {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .label-preview,
+  .etiqueta-preview,
+  .preview-card,
+  .qr-preview {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .qr-preview img,
+  .label-preview img,
+  .etiqueta-preview img {
+    max-width: 180px !important;
+    height: auto !important;
+  }
+
+  .table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 760px !important;
+  }
+}
+
+/* =========================================================
+   Ajuste final de responsividade - Etiquetas QR Code
+   ========================================================= */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.layout,
+.main,
+.content-grid,
+.etiquetas-grid,
+.panel,
+.preview-panel,
+.table-wrap {
+  min-width: 0;
+}
+
+.btn-primary,
+.btn-secondary,
+.action-btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .layout {
+    display: block !important;
+  }
+
+  .main {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .etiquetas-grid,
+  .content-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .preview-panel {
+    position: static !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .main {
+    padding: 22px 14px !important;
+  }
+
+  .topbar {
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .topbar h1 {
+    font-size: 30px !important;
+    line-height: 1.1 !important;
+  }
+
+  .topbar p {
+    font-size: 14px !important;
+  }
+
+  .status {
+    align-self: flex-start !important;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .metric-card {
+    padding: 18px !important;
+  }
+
+  .panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+  }
+
+  .panel-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .panel-header h2 {
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+  }
+
+  .panel-header p {
+    font-size: 13px !important;
+  }
+
+  .form-grid,
+  .filters,
+  .label-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  input,
+  select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .form-actions,
+  .preview-actions,
+  .table-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary,
+  .form-actions a,
+  .preview-actions .btn-primary,
+  .preview-actions .btn-secondary,
+  .preview-actions a,
+  .filters button,
+  .action-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 16px;
+  }
+
+  .table {
+    min-width: 760px !important;
+  }
+
+  .label-body {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: 16px !important;
+  }
+
+  .industrial-label .label-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .industrial-label .label-header strong {
+    font-size: 18px !important;
+  }
+
+  .industrial-label .label-info h3 {
+    font-size: 24px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .industrial-label .label-info p {
+    overflow-wrap: anywhere;
+  }
+
+  .industrial-label .qr-area {
+    justify-content: center !important;
+  }
+
+  .industrial-label .qr {
+    width: 150px !important;
+    height: 150px !important;
+    margin: 0 auto !important;
+  }
+
+  .industrial-label .qr img {
+    width: 136px !important;
+    height: 136px !important;
+  }
+
+  .label-footer {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .main {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .panel {
+    padding: 16px !important;
+  }
+
+  .topbar h1 {
+    font-size: 28px !important;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .action-btn {
+    min-height: 48px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    white-space: normal !important;
+  }
+
+  .industrial-label .qr {
+    width: 138px !important;
+    height: 138px !important;
+  }
+
+  .industrial-label .qr img {
+    width: 124px !important;
+    height: 124px !important;
+  }
+}

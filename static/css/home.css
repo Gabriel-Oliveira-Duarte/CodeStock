@@ -607,3 +607,128 @@
         overflow-x: auto;
       }
     }
+
+
+/* ===== CORREÇÃO GLOBAL DA SIDEBAR =====
+   Mantém a sidebar ocupando toda a altura da tela e permite rolagem interna
+   para acessar o usuário logado e o botão "Sair do sistema". */
+@media (min-width: 1181px) {
+  .layout {
+    min-height: 100vh;
+    background: var(--azul-marinho);
+    align-items: stretch;
+  }
+
+  .sidebar {
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  }
+
+  .sidebar > div:first-child {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.42);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE - ETAPA 2: Usuários e telas com home.css
+   ========================================================= */
+@media (max-width: 1180px) {
+  .main {
+    padding-top: 78px;
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .panel-header,
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-form-grid,
+  .edit-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-actions,
+  .actions-inline {
+    width: 100%;
+  }
+
+  .form-actions {
+    justify-content: stretch !important;
+  }
+
+  .btn-submit,
+  .btn-edit,
+  .btn-danger,
+  .actions-inline form {
+    width: 100%;
+  }
+
+  .actions-inline {
+    flex-direction: column;
+  }
+
+  .panel:has(.table),
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 760px;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .panel {
+    padding: 18px;
+    border-radius: 20px;
+  }
+}

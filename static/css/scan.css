@@ -197,3 +197,69 @@ button.btn-secondary {
     display: grid;
   }
 }
+
+/* =========================================================
+   Responsividade - Scanner
+   ========================================================= */
+@media (max-width: 900px) {
+  .scanner-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .manual-panel {
+    order: 2;
+  }
+
+  .scanner-panel {
+    order: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar,
+  .panel-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .scanner-layout {
+    gap: 18px !important;
+  }
+
+  .panel {
+    padding: 20px !important;
+    border-radius: 22px !important;
+  }
+
+  .reader-shell {
+    padding: 10px !important;
+    border-radius: 18px !important;
+  }
+
+  #reader {
+    width: 100% !important;
+    min-height: 260px !important;
+  }
+
+  .scan-frame {
+    width: min(68vw, 220px) !important;
+    height: min(68vw, 220px) !important;
+  }
+
+  .scanner-actions {
+    grid-template-columns: 1fr !important;
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  .scanner-actions button,
+  .manual-form button,
+  .btn-primary.full {
+    width: 100% !important;
+  }
+
+  .tips-box {
+    padding: 16px !important;
+  }
+}
